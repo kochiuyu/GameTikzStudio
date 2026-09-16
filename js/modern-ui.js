@@ -67,6 +67,45 @@ function formatTikzHighlight(rawTikz) {
 window.formatTikzHighlight = formatTikzHighlight;
 window.toggleCodeFontSize = toggleCodeFontSize;
 
+function formatTikZSyntax(rawCode) {
+  if (!rawCode) return '';
+  return rawCode.split('\n').map(function(line) {
+    var commentIdx = line.indexOf('%');
+    var codePart = commentIdx !== -1 ? line.slice(0, commentIdx) : line;
+    var commentPart = commentIdx !== -1 ? line.slice(commentIdx) : '';
+
+    var escapedCode = codePart
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // LaTeX commands: \matrix, \node, \draw, \path, \definecolor, etc.
+    escapedCode = escapedCode.replace(/(\\[a-zA-Z]+)/g, '<span style="color: #38bdf8; font-weight: 600;">$1</span>');
+
+    // Environment tags: \begin{...}, \end{...}
+    escapedCode = escapedCode.replace(/(<span style="color: #38bdf8; font-weight: 600;">\\(?:begin|end)<\/span>)\{([^}]+)\}/g, '$1{<span style="color: #f472b6; font-weight: 600;">$2</span>}');
+
+    // Options in [ ... ]
+    escapedCode = escapedCode.replace(/\[([^\]]+)\]/g, '[<span style="color: #6ee7b7;">$1</span>]');
+
+    // Math inline $ ... $
+    escapedCode = escapedCode.replace(/\$([^$]+)\$/g, '$<span style="color: #fde047;">$1</span>$');
+
+    // Node names in ( ... )
+    escapedCode = escapedCode.replace(/\(([a-zA-Z0-9_\-\.]+)\)/g, '(<span style="color: #bae6fd;">$1</span>)');
+
+    var escapedComment = '';
+    if (commentPart) {
+      escapedComment = '<span style="color: #94a3b8; font-style: italic;">' + 
+        commentPart.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+        '</span>';
+    }
+
+    return escapedCode + escapedComment;
+  }).join('\n');
+}
+window.formatTikZSyntax = formatTikZSyntax;
+
 function setTikzExportMode(snippetOnly) {
   window.tikzSnippetOnly = !!snippetOnly;
   

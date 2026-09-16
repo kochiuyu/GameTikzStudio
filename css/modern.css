@@ -1027,9 +1027,7 @@ a:hover {
 
 .code-viewport pre,
 .code-viewport pre[class*="language-"],
-.latex-editor-container pre,
-#tikz-output-code,
-pre#tikz-output-code {
+.latex-editor-container pre:not(#tikz-output-code) {
   margin: 0 !important;
   background: transparent !important;
   border: none !important;
@@ -1045,6 +1043,60 @@ pre#tikz-output-code {
   word-wrap: normal !important;
   user-select: text;
   -webkit-user-select: text;
+}
+
+#tikz-output-code,
+pre#tikz-output-code,
+.code-area-modern,
+textarea.code-area-modern,
+#tikz-code-area,
+textarea#tikz-code-area,
+#standalone-code-area,
+textarea#standalone-code-area,
+#tabular-code-area,
+textarea#tabular-code-area,
+#timing-tikz-code,
+textarea#timing-tikz-code,
+#timing-standalone-code,
+textarea#timing-standalone-code {
+  margin: 0 !important;
+  background: #020617 !important;
+  background-color: #020617 !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  padding: 1rem 1.25rem !important;
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  text-shadow: none !important;
+  font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important;
+  font-size: 0.85rem !important;
+  line-height: 1.6 !important;
+  white-space: pre !important;
+  word-break: normal !important;
+  word-wrap: normal !important;
+  tab-size: 2 !important;
+  opacity: 1 !important;
+  caret-color: #38bdf8 !important;
+  outline: none !important;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.code-area-modern:focus,
+textarea.code-area-modern:focus,
+#tikz-code-area:focus,
+textarea#tikz-code-area:focus,
+#standalone-code-area:focus,
+textarea#standalone-code-area:focus,
+#tabular-code-area:focus,
+textarea#tabular-code-area:focus,
+#timing-tikz-code:focus,
+textarea#timing-tikz-code:focus,
+#timing-standalone-code:focus,
+textarea#timing-standalone-code:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
 }
 
 .code-viewport pre.line-numbers {

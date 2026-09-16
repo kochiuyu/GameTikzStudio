@@ -52,10 +52,14 @@
     }
     #tikz-output-code,
     pre#tikz-output-code {
-      background: #0f172a !important;
+      background: #020617 !important;
+      background-color: #020617 !important;
       color: #f8fafc !important;
-      border: none !important;
-      box-shadow: none !important;
+      border: 1px solid #1e293b !important;
+      border-radius: 6px !important;
+      padding: 1rem 1.25rem !important;
+      font-size: 0.85rem !important;
+      line-height: 1.6 !important;
       font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important;
       user-select: text;
       -webkit-user-select: text;
@@ -488,8 +492,8 @@
             </div>
           </div>
 
-          <div style="position: relative; background: #0f172a; padding: 1rem 1.25rem;">
-            <pre id="tikz-output-code" style="margin: 0; padding: 0; background: #0f172a !important; color: #f8fafc !important; border: none !important; box-shadow: none !important; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace; font-size: 0.825rem; line-height: 1.6; max-height: 280px; overflow: auto; white-space: pre; tab-size: 2; user-select: text; -webkit-user-select: text;"></pre>
+          <div style="position: relative; background: #0b1329; padding: 0.75rem 1rem;">
+            <pre id="tikz-output-code" style="margin: 0; padding: 1rem 1.25rem !important; background: #020617 !important; background-color: #020617 !important; color: #f8fafc !important; border: 1px solid #1e293b !important; border-radius: 6px !important; box-shadow: none !important; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace; font-size: 0.85rem !important; line-height: 1.6 !important; max-height: 320px; overflow: auto; white-space: pre; tab-size: 2; user-select: text; -webkit-user-select: text;"></pre>
           </div>
 
           <!-- TikZ Tree Code Syntax Guide for Beginners -->
@@ -863,10 +867,48 @@
       updateTikZDisplay();
     }
 
+    function formatTikZSyntax(rawCode) {
+      if (!rawCode) return '';
+      return rawCode.split('\n').map(function(line) {
+        var commentIdx = line.indexOf('%');
+        var codePart = commentIdx !== -1 ? line.slice(0, commentIdx) : line;
+        var commentPart = commentIdx !== -1 ? line.slice(commentIdx) : '';
+
+        var escapedCode = codePart
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        // LaTeX commands
+        escapedCode = escapedCode.replace(/(\\[a-zA-Z]+)/g, '<span style="color: #38bdf8; font-weight: 600;">$1</span>');
+
+        // Environment tags
+        escapedCode = escapedCode.replace(/(<span style="color: #38bdf8; font-weight: 600;">\\(?:begin|end)<\/span>)\{([^}]+)\}/g, '$1{<span style="color: #f472b6; font-weight: 600;">$2</span>}');
+
+        // Options in [ ... ]
+        escapedCode = escapedCode.replace(/\[([^\]]+)\]/g, '[<span style="color: #6ee7b7;">$1</span>]');
+
+        // Math inline $ ... $
+        escapedCode = escapedCode.replace(/\$([^$]+)\$/g, '$<span style="color: #fde047;">$1</span>$');
+
+        // Node names in ( ... )
+        escapedCode = escapedCode.replace(/\(([a-zA-Z0-9_\-\.]+)\)/g, '(<span style="color: #bae6fd;">$1</span>)');
+
+        var escapedComment = '';
+        if (commentPart) {
+          escapedComment = '<span style="color: #94a3b8; font-style: italic;">' + 
+            commentPart.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + 
+            '</span>';
+        }
+
+        return escapedCode + escapedComment;
+      }).join('\n');
+    }
+
     function updateTikZDisplay() {
       if (!activeTreeModel) return;
       const code = treeSnippetOnly ? activeTreeModel.generateTikZ() : getStandaloneTex();
-      $('#tikz-output-code').text(code);
+      $('#tikz-output-code').html('<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + formatTikZSyntax(code) + '</code>');
       if (window.gameTreeHistory && !window.gameTreeHistory.isRestoring) {
         window.gameTreeHistory.push();
       }

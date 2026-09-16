@@ -1073,17 +1073,33 @@
 
   // Update Code Views
   function updateCodeViews() {
+    var fn = window.formatTikZSyntax || function(s) { return s; };
     var tikzElem = document.getElementById("tikz-code-area");
     if (tikzElem) {
-      tikzElem.value = generateTikZCode(false);
+      var code = generateTikZCode(false);
+      tikzElem.value = code;
+      var hl = document.getElementById("tikz-code-highlight");
+      if (hl) {
+        hl.innerHTML = '<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + fn(code) + '</code>';
+      }
     }
     var standaloneElem = document.getElementById("standalone-code-area");
     if (standaloneElem) {
-      standaloneElem.value = generateTikZCode(true);
+      var sCode = generateTikZCode(true);
+      standaloneElem.value = sCode;
+      var sHl = document.getElementById("standalone-code-highlight");
+      if (sHl) {
+        sHl.innerHTML = '<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + fn(sCode) + '</code>';
+      }
     }
     var tabularElem = document.getElementById("tabular-code-area");
     if (tabularElem) {
-      tabularElem.value = generateTabularCode();
+      var tCode = generateTabularCode();
+      tabularElem.value = tCode;
+      var tHl = document.getElementById("tabular-code-highlight");
+      if (tHl) {
+        tHl.innerHTML = '<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + fn(tCode) + '</code>';
+      }
     }
   }
 

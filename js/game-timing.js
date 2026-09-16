@@ -1243,13 +1243,24 @@
   }
 
   function updateCodeViews() {
+    var fn = window.formatTikZSyntax || function(s) { return s; };
     var tikzElem = document.getElementById("timing-tikz-code");
     if (tikzElem) {
-      tikzElem.value = generateTikZCode(false);
+      var code = generateTikZCode(false);
+      tikzElem.value = code;
+      var hl = document.getElementById("timing-tikz-highlight");
+      if (hl) {
+        hl.innerHTML = '<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + fn(code) + '</code>';
+      }
     }
     var standaloneElem = document.getElementById("timing-standalone-code");
     if (standaloneElem) {
-      standaloneElem.value = generateTikZCode(true);
+      var sCode = generateTikZCode(true);
+      standaloneElem.value = sCode;
+      var sHl = document.getElementById("timing-standalone-highlight");
+      if (sHl) {
+        sHl.innerHTML = '<code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;">' + fn(sCode) + '</code>';
+      }
     }
   }
 

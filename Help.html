@@ -409,20 +409,25 @@
         </p>
 
         <div style="background: #0f172a; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem;">
-          <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Recommended LaTeX Document Preamble</div>
-          <pre style="margin: 0; font-family: var(--font-mono); font-size: 0.825rem; color: #e2e8f0; line-height: 1.5; overflow-x: auto;"><code>\documentclass[border=8pt]{standalone}
-\usepackage{tikz}
-\usepackage{amsmath, amssymb}
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Recommended LaTeX Document Preamble</div>
+            <button id="copy-preamble-btn" onclick="navigator.clipboard.writeText(document.getElementById('latex-preamble-code').innerText).then(() => { this.innerText = 'Copied!'; setTimeout(() => { this.innerText = 'Copy Code'; }, 2000); })" class="btn-modern btn-modern-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.65rem; background: #1e293b; color: #f8fafc; border: 1px solid #334155; border-radius: 4px; cursor: pointer;">
+              Copy Code
+            </button>
+          </div>
+          <pre id="latex-preamble-code" style="margin: 0; font-family: var(--font-mono); font-size: 0.85rem; color: #f8fafc !important; background: #020617 !important; background-color: #020617 !important; border: 1px solid #1e293b !important; border-radius: 6px; padding: 1rem; line-height: 1.6; overflow-x: auto;"><code style="color: #f8fafc; background: transparent; border: none; font-family: inherit;"><span style="color: #38bdf8;">\documentclass</span>[border=8pt]{<span style="color: #bae6fd;">standalone</span>}
+<span style="color: #38bdf8;">\usepackage</span>{<span style="color: #bae6fd;">tikz</span>}
+<span style="color: #38bdf8;">\usepackage</span>{<span style="color: #bae6fd;">amsmath, amssymb</span>}
 
-% Essential TikZ libraries used by the studios:
-\usetikzlibrary{calc}                     % Coordinate mathematics
-\usetikzlibrary{matrix}                   % Bimatrix normal-form grids
-\usetikzlibrary{positioning}              % Relative node placement
-\usetikzlibrary{decorations.pathreplacing}% Curly braces for timing phases
+<span style="color: #94a3b8;">% Essential TikZ libraries used by the studios:</span>
+<span style="color: #38bdf8;">\usetikzlibrary</span>{<span style="color: #6ee7b7;">calc</span>}                     <span style="color: #94a3b8;">% Coordinate mathematics</span>
+<span style="color: #38bdf8;">\usetikzlibrary</span>{<span style="color: #6ee7b7;">matrix</span>}                   <span style="color: #94a3b8;">% Bimatrix normal-form grids</span>
+<span style="color: #38bdf8;">\usetikzlibrary</span>{<span style="color: #6ee7b7;">positioning</span>}              <span style="color: #94a3b8;">% Relative node placement</span>
+<span style="color: #38bdf8;">\usetikzlibrary</span>{<span style="color: #6ee7b7;">decorations.pathreplacing</span>}<span style="color: #94a3b8;">% Curly braces for timing phases</span>
 
-\begin{document}
-  % Paste your generated \begin{tikzpicture} ... \end{tikzpicture} here
-\end{document}</code></pre>
+<span style="color: #f472b6;">\begin</span>{<span style="color: #bae6fd;">document</span>}
+  <span style="color: #94a3b8;">% Paste your generated \begin{tikzpicture} ... \end{tikzpicture} here</span>
+<span style="color: #f472b6;">\end</span>{<span style="color: #bae6fd;">document</span>}</code></pre>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">

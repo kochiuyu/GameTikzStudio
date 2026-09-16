@@ -17,6 +17,55 @@
   <script type="text/javascript" src="js/modern-ui.js"></script>
   <script type="text/javascript" src="js/export-png.js"></script>
   <script type="text/javascript" src="js/game-timing.js"></script>
+  <style>
+    .code-area-modern,
+    textarea.code-area-modern,
+    #timing-tikz-code,
+    textarea#timing-tikz-code,
+    #timing-standalone-code,
+    textarea#timing-standalone-code {
+      background: transparent !important;
+      background-color: transparent !important;
+      color: transparent !important;
+      -webkit-text-fill-color: transparent !important;
+      border: none !important;
+      border-radius: 6px !important;
+      padding: 1rem 1.25rem !important;
+      font-size: 0.85rem !important;
+      line-height: 1.6 !important;
+      font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important;
+      box-shadow: none !important;
+      outline: none !important;
+      caret-color: #38bdf8 !important;
+      opacity: 1 !important;
+      user-select: text !important;
+      -webkit-user-select: text !important;
+      white-space: pre !important;
+      tab-size: 2 !important;
+      -webkit-font-smoothing: antialiased !important;
+      font-variant-ligatures: none !important;
+    }
+    #timing-panel-snippet,
+    #timing-panel-standalone {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #020617;
+      border: 1px solid #1e293b;
+    }
+    #timing-panel-snippet:focus-within,
+    #timing-panel-standalone:focus-within {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    }
+    .code-area-modern::selection,
+    textarea#timing-tikz-code::selection,
+    textarea#timing-standalone-code::selection {
+      background: rgba(56, 189, 248, 0.35) !important;
+      color: transparent !important;
+      -webkit-text-fill-color: transparent !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -248,11 +297,13 @@
           </div>
 
           <div id="timing-panel-snippet">
-            <textarea id="timing-tikz-code" readonly class="code-area-modern" style="width: 100%; height: 320px; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem; line-height: 1.4; border: 1px solid var(--color-border); border-radius: 6px; background: #0f172a; color: #e2e8f0; resize: vertical;"></textarea>
+            <pre id="timing-tikz-highlight" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 1rem 1.25rem; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important; font-size: 0.85rem !important; line-height: 1.6 !important; color: #f8fafc !important; white-space: pre !important; overflow: hidden; pointer-events: none; box-sizing: border-box; tab-size: 2; z-index: 1; background: transparent; -webkit-font-smoothing: antialiased; font-variant-ligatures: none;"><code style="font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; background: transparent; border: none;"></code></pre>
+            <textarea id="timing-tikz-code" readonly class="code-area-modern" style="position: relative; width: 100%; height: 320px; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important; font-size: 0.85rem !important; padding: 1rem 1.25rem !important; line-height: 1.6 !important; resize: vertical; box-sizing: border-box; outline: none; z-index: 2;" spellcheck="false" onscroll="syncTimingHighlightScroll('snippet')"></textarea>
           </div>
 
           <div id="timing-panel-standalone" style="display: none;">
-            <textarea id="timing-standalone-code" readonly class="code-area-modern" style="width: 100%; height: 320px; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem; line-height: 1.4; border: 1px solid var(--color-border); border-radius: 6px; background: #0f172a; color: #e2e8f0; resize: vertical;"></textarea>
+            <pre id="timing-standalone-highlight" aria-hidden="true" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0; padding: 1rem 1.25rem; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important; font-size: 0.85rem !important; line-height: 1.6 !important; color: #f8fafc !important; white-space: pre !important; overflow: hidden; pointer-events: none; box-sizing: border-box; tab-size: 2; z-index: 1; background: transparent; -webkit-font-smoothing: antialiased; font-variant-ligatures: none;"><code style="font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; background: transparent; border: none;"></code></pre>
+            <textarea id="timing-standalone-code" readonly class="code-area-modern" style="position: relative; width: 100%; height: 320px; font-family: 'JetBrains Mono', 'Fira Code', var(--font-mono), monospace !important; font-size: 0.85rem !important; padding: 1rem 1.25rem !important; line-height: 1.6 !important; resize: vertical; box-sizing: border-box; outline: none; z-index: 2;" spellcheck="false" onscroll="syncTimingHighlightScroll('standalone')"></textarea>
           </div>
 
           <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
@@ -305,6 +356,15 @@
       }
     }
 
+    function syncTimingHighlightScroll(type) {
+      var area = document.getElementById(type === 'standalone' ? 'timing-standalone-code' : 'timing-tikz-code');
+      var hl = document.getElementById(type === 'standalone' ? 'timing-standalone-highlight' : 'timing-tikz-highlight');
+      if (area && hl) {
+        hl.scrollTop = area.scrollTop;
+        hl.scrollLeft = area.scrollLeft;
+      }
+    }
+
     function switchTimingTab(tab) {
       document.getElementById('tab-timing-snippet').classList.remove('active');
       document.getElementById('tab-timing-standalone').classList.remove('active');
@@ -314,10 +374,31 @@
       if (tab === 'snippet') {
         document.getElementById('tab-timing-snippet').classList.add('active');
         document.getElementById('timing-panel-snippet').style.display = 'block';
+        syncTimingHighlightScroll('snippet');
       } else {
         document.getElementById('tab-timing-standalone').classList.add('active');
         document.getElementById('timing-panel-standalone').style.display = 'block';
+        syncTimingHighlightScroll('standalone');
       }
+    }
+
+    if (window.ResizeObserver) {
+      var roTiming = new ResizeObserver(function(entries) {
+        entries.forEach(function(entry) {
+          var target = entry.target;
+          var hlId = target.id === 'timing-standalone-code' ? 'timing-standalone-highlight' : 'timing-tikz-highlight';
+          var hl = document.getElementById(hlId);
+          if (hl) {
+            hl.style.height = target.offsetHeight + 'px';
+          }
+        });
+      });
+      window.addEventListener('DOMContentLoaded', function() {
+        ['timing-tikz-code', 'timing-standalone-code'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) roTiming.observe(el);
+        });
+      });
     }
 
     function copyTimingTikZ() {
