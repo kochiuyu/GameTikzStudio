@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Theory TikZ Studio - Documentation &amp; User Guide</title>
+  <meta name="description" content="Comprehensive guide to generating publication-ready game theory diagrams: Extensive-Form Game Trees, Strategic-Form Payoff Matrices, and Dynamic Game Stages in LaTeX TikZ." />
+  <meta property="og:title" content="Game Theory TikZ Studio - Documentation &amp; User Guide" />
+  <meta property="og:description" content="Comprehensive guide to generating publication-ready game theory diagrams: Extensive-Form Game Trees, Strategic-Form Payoff Matrices, and Dynamic Game Stages in LaTeX TikZ." />
+
+  <link rel="stylesheet" href="css/modern.css">
+  <link rel="stylesheet" href="css/latex.css">
+
+  <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+  <style>
+    .help-tab-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--color-border);
+      background: #ffffff;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .help-tab-btn:hover {
+      background: #f8fafc;
+      color: var(--color-text-main);
+      border-color: #cbd5e1;
+    }
+    .help-tab-btn.active {
+      background: var(--color-primary, #4f46e5);
+      color: #ffffff;
+      border-color: var(--color-primary, #4f46e5);
+      box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+    }
+    .help-section-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: 5.5rem;
+    }
+    .help-chip {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo" id="brand-link">
+        <div class="brand-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">GT</div>
+        <div class="brand-text">
+          <span class="brand-title">Game Theory TikZ Studio</span>
+          <span class="brand-subtitle">Documentation &amp; User Guide</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li class="nav-item"><a href="index.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Overview
+        </a></li>
+        <li class="nav-item"><a href="GameTree.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><line x1="12" y1="8" x2="6" y2="16"/><line x1="12" y1="8" x2="18" y2="16"/></svg>
+          Extensive Form (Trees)
+        </a></li>
+        <li class="nav-item"><a href="PayoffMatrix.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Strategic Form (Matrices)
+        </a></li>
+        <li class="nav-item"><a href="GameTiming.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Game Stages (Timing)
+        </a></li>
+        <li class="nav-item active"><a href="Help.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Docs &amp; Guide
+        </a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <!-- Hero Header Banner -->
+    <div style="text-align: center; max-width: 840px; margin: 1.5rem auto 2rem;">
+      <span class="nav-badge" style="margin-bottom: 0.75rem; background: #e0e7ff; color: #3730a3; font-weight: 700;">Documentation &amp; Academic Reference</span>
+      <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-text-main); margin-bottom: 0.6rem; letter-spacing: -0.02em;">
+        Game Theory TikZ Studio Guide
+      </h1>
+      <p style="color: var(--color-text-muted); font-size: 1.05rem; line-height: 1.6;">
+        The complete manual for drafting publication-grade figures in LaTeX TikZ. Covers Extensive-Form Trees with imperfect information and SPNE paths, Strategic-Form Bimatrix games with best-response underlines and IESDS, and Dynamic Sequence of Play diagrams.
+      </p>
+    </div>
+
+    <!-- Sticky Studio Switcher Pills -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 2.5rem; position: sticky; top: 72px; z-index: 10; background: rgba(248, 250, 252, 0.92); backdrop-filter: blur(8px); padding: 0.6rem 0.75rem; border-radius: 9999px; border: 1px solid #e2e8f0; max-width: 900px; margin-left: auto; margin-right: auto;">
+      <a href="#game-theory-101" class="help-tab-btn active" onclick="activateHelpTab(this)">🎓 Game Theory 101</a>
+      <a href="#overview" class="help-tab-btn" onclick="activateHelpTab(this)">Studio Overview</a>
+      <a href="#gametree" class="help-tab-btn" onclick="activateHelpTab(this)">Extensive Form (Trees)</a>
+      <a href="#payoffmatrix" class="help-tab-btn" onclick="activateHelpTab(this)">Strategic Form (Matrices)</a>
+      <a href="#gametiming" class="help-tab-btn" onclick="activateHelpTab(this)">Game Stages (Timing)</a>
+      <a href="#latex-preamble" class="help-tab-btn" onclick="activateHelpTab(this)">LaTeX &amp; Overleaf</a>
+    </div>
+
+    <!-- Main Content Container -->
+    <div style="display: flex; flex-direction: column; gap: 2rem; max-width: 920px; margin: 0 auto 3.5rem;">
+
+      <!-- SECTION: Game Theory 101 Primer for Beginners -->
+      <section id="game-theory-101" class="help-section-card" style="border-left: 4px solid #10b981;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            🎓 Game Theory 101: Visual Guide for Beginners
+          </h2>
+          <span class="help-chip" style="background: #ecfdf5; color: #059669;">Beginner Primer</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+          Welcome to Game Theory! Whether you are taking your first economics, political science, or computer science class, this visual guide explains what every symbol, line, and number means.
+        </p>
+
+        <!-- Concept 1: How to read a Game Tree -->
+        <div class="concept-box" style="margin-bottom: 1.25rem;">
+          <h3 class="concept-box-title" style="color: #4f46e5;">
+            <span>🌳</span>
+            <span>1. How to Read an Extensive-Form Game Tree</span>
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 0.85rem;">
+            A game tree illustrates sequential decisions over time. Think of it as a flowchart of choices:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem; font-size: 0.8rem;">
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong style="color: #1e3a8a; display: block; margin-bottom: 0.25rem;">● Decision Node (Root &amp; Intermediate)</strong>
+              <span>Marks whose turn it is to act (e.g., Player 1 or Firm A). The branch lines emerging from this node are the available actions (e.g., "Enter" or "Stay Out").</span>
+            </div>
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong style="color: #b45309; display: block; margin-bottom: 0.25rem;">○ Nature / Chance Node</strong>
+              <span>An external random event (coin flip, weather, economic climate). The branches represent probabilities that must sum to 1 (e.g., $p$ and $1-p$).</span>
+            </div>
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong style="color: #0f172a; display: block; margin-bottom: 0.25rem;">● Terminal Payoff $(u_1, u_2)$</strong>
+              <span>The game concludes here. <em>Crucial rule:</em> The first number is Player 1's payoff; the second number is Player 2's payoff.</span>
+            </div>
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong style="color: #475569; display: block; margin-bottom: 0.25rem;">- - - Dashed Arc (Information Set)</strong>
+              <span>Connects decision nodes when a player must move without knowing which node was reached (e.g., Player 2 moves without seeing Player 1's action).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Concept 2: How to read a Payoff Matrix -->
+        <div class="concept-box" style="margin-bottom: 1.25rem;">
+          <h3 class="concept-box-title" style="color: #0284c7;">
+            <span>📊</span>
+            <span>2. How to Read a Payoff Matrix &amp; The 30-Second Underline Method</span>
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 0.85rem;">
+            A payoff matrix represents simultaneous games where both players decide without knowing each other's choice.
+          </p>
+          <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; padding: 0.85rem; margin-bottom: 0.75rem; font-size: 0.825rem; line-height: 1.5; color: #0369a1;">
+            <strong>The 3-Step Underline Method for finding Pure Nash Equilibria:</strong>
+            <ol style="margin: 0.35rem 0 0; padding-left: 1.2rem;">
+              <li><strong>Check Row Player's Best Responses:</strong> Look at each column individually. Compare Player 1's payoffs (the 1st number in each cell) and underline the highest one ($\underline{u_1}$).</li>
+              <li><strong>Check Column Player's Best Responses:</strong> Look at each row individually. Compare Player 2's payoffs (the 2nd number in each cell) and underline the highest one ($\underline{u_2}$).</li>
+              <li><strong>Find Mutual Best Responses:</strong> Any cell where <strong>both numbers are underlined</strong> $(\underline{u_1}, \underline{u_2})$ is a Pure Strategy Nash Equilibrium ($\text{NE}^\star$)!</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Concept 3: Backward Induction -->
+        <div class="concept-box" style="margin-bottom: 1.25rem;">
+          <h3 class="concept-box-title" style="color: #059669;">
+            <span>🎯</span>
+            <span>3. How Backward Induction Works on Game Trees</span>
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 0.65rem;">
+            To solve sequential games, start at the <strong>end</strong> of the tree and reason backwards:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.65rem; font-size: 0.78rem;">
+            <div style="background: #f8fafc; padding: 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong>Step 1: Look at final decision nodes</strong><br>
+              Examine the last player's choices and select the branch that yields their highest individual payoff.
+            </div>
+            <div style="background: #f8fafc; padding: 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong>Step 2: Anticipate rational moves</strong><br>
+              The earlier player knows what the later player will do, so they choose the action that maximizes their own expected payoff.
+            </div>
+            <div style="background: #f8fafc; padding: 0.65rem; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <strong>Step 3: Highlight the SPNE path</strong><br>
+              Highlight the resulting branches in bold red in our Extensive-Form Studio to show the Subgame Perfect Nash Equilibrium.
+            </div>
+          </div>
+        </div>
+
+        <!-- Beginner FAQ -->
+        <div class="concept-box">
+          <h3 class="concept-box-title" style="color: #0f172a;">
+            <span>💡</span>
+            <span>Frequently Asked Questions for New Learners</span>
+          </h3>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.5;">
+            <div>
+              <strong style="color: #0f172a;">Do I need to know LaTeX syntax to use these studios?</strong><br>
+              No! You can type ordinary labels (e.g. <code>Enter</code>, <code>Stay Out</code>, <code>Cooperate</code>, <code>(3, 1)</code>). The tool formats everything into clean, standard TikZ code automatically.
+            </div>
+            <div>
+              <strong style="color: #0f172a;">How do I export my diagram into Microsoft Word or Google Slides?</strong><br>
+              Click <strong>Export PNG</strong> or <strong>Export SVG</strong> on the diagram toolbar. You will get a crisp, transparent vector or high-DPI image ready to drag directly into documents or slides.
+            </div>
+            <div>
+              <strong style="color: #0f172a;">How do I use this with Overleaf or my LaTeX research paper?</strong><br>
+              Click <strong>Open in Overleaf</strong> to instantly compile a complete standalone document in Overleaf, or click <strong>Copy TikZ Code</strong> to paste just the <code>\begin{tikzpicture} ... \end{tikzpicture}</code> snippet into your existing paper.
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SECTION 0: Overview -->
+      <section id="overview" class="help-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            Architecture &amp; Core Pillars
+          </h2>
+          <span class="help-chip" style="background: #e0e7ff; color: #4338ca;">Pillars</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+          Game Theory TikZ Studio is engineered specifically for economic theory, political science, and mathematical games. It provides dedicated tools for the three standard representations of strategic interaction:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+          <a href="GameTree.html" style="text-decoration: none; display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.1rem; transition: border-color 0.15s ease;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+              <span style="color: #4f46e5; font-size: 1.1rem;">🌳</span>
+              <strong style="color: #0f172a; font-size: 0.95rem;">Extensive-Form Studio</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Sequential game trees, chance/nature nodes, imperfect information sets, and backward induction solution paths.
+            </p>
+          </a>
+
+          <a href="PayoffMatrix.html" style="text-decoration: none; display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.1rem; transition: border-color 0.15s ease;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+              <span style="color: #0284c7; font-size: 1.1rem;">📊</span>
+              <strong style="color: #0f172a; font-size: 0.95rem;">Strategic-Form Studio</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              $2\times 2, 2\times 3, 3\times 3, N\times M$ bimatrix games with best-response underlines, Nash highlights, and IESDS.
+            </p>
+          </a>
+
+          <a href="GameTiming.html" style="text-decoration: none; display: block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.1rem; transition: border-color 0.15s ease;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+              <span style="color: #059669; font-size: 1.1rem;">⏱️</span>
+              <strong style="color: #0f172a; font-size: 0.95rem;">Game Stages &amp; Timing</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Sequence of play timelines ($t=0, 1, 2\dots$), active player mover badges, information states, and phase brackets.
+            </p>
+          </a>
+        </div>
+      </section>
+
+      <!-- SECTION 1: Extensive Form Game Trees -->
+      <section id="gametree" class="help-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            1. Extensive-Form Game Tree Studio
+          </h2>
+          <span class="help-chip" style="background: #e0e7ff; color: #4338ca;">GameTree.html</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+          The Extensive-Form Studio models sequential decision problems, games with imperfect information, and games against Nature.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #4f46e5; display: block; margin-bottom: 0.35rem;">Node Hierarchy &amp; Types</strong>
+            <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5;">
+              <li><strong>Player Decision Nodes:</strong> Solid filled circles labeled with the active player's name (e.g., Player 1, Firm 2).</li>
+              <li><strong>Nature / Chance Nodes:</strong> Solid open circles representing random external events with probability branch labels (e.g., $p, 1-p$).</li>
+              <li><strong>Terminal Nodes:</strong> Solid dots terminating a branch, formatted with a payoff vector tuple: $(u_1, u_2, \dots, u_n)$.</li>
+            </ul>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #0284c7; display: block; margin-bottom: 0.35rem;">Information Sets (Simultaneous Moves)</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              When a player cannot observe which decision node was reached, select the nodes and click <strong>Create Information Set</strong>. The tool generates standard dashed TikZ curves connecting the nodes with player label identification.
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #059669; display: block; margin-bottom: 0.35rem;">Backward Induction &amp; SPNE Highlighting</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Mark branches on the Subgame Perfect Nash Equilibrium (SPNE) path as active. The generator formats them with bold colored lines and equilibrium arrows to emphasize the optimal decision path.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">Classic Game Presets Included:</h3>
+        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+          <span class="nav-badge">Spence Job Market Signaling</span>
+          <span class="nav-badge">Centipede Game</span>
+          <span class="nav-badge">Stackelberg Sequential Duopoly</span>
+          <span class="nav-badge">Rubinstein Alternating Offers</span>
+          <span class="nav-badge">Selten's Chain Store Paradox</span>
+          <span class="nav-badge">Market Entry Deterrence</span>
+          <span class="nav-badge">Ultimatum Bargaining</span>
+          <span class="nav-badge">Kuhn Poker</span>
+        </div>
+      </section>
+
+      <!-- SECTION 2: Strategic Form Payoff Matrices -->
+      <section id="payoffmatrix" class="help-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            2. Strategic-Form Payoff Matrix Studio
+          </h2>
+          <span class="help-chip" style="background: #e0e7ff; color: #4338ca;">PayoffMatrix.html</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+          The Strategic-Form Studio builds clean bimatrix normal-form games using standard TikZ <code style="font-family: var(--font-mono); color: #4f46e5;">matrix of nodes</code>.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #4f46e5; display: block; margin-bottom: 0.35rem;">Best-Response Underlining</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Toggle auto best-response calculation or click individual payoffs. In LaTeX, Player 1 best-responses format as <code style="font-family: var(--font-mono);">\underline{u_1}</code> and Player 2 as <code style="font-family: var(--font-mono);">\underline{u_2}</code>.
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #0284c7; display: block; margin-bottom: 0.35rem;">Nash Equilibrium Highlights</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Cells where both payoffs are mutual best responses automatically highlight in emerald green with a <code style="font-family: var(--font-mono);">[fill=emerald!15]</code> TikZ node style and a badge indicating Pure Strategy Nash Equilibria.
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 0.35rem;">IESDS Domination Strike-Outs</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Mark strictly dominated strategies for elimination. TikZ draws horizontal or vertical strike-through red lines (<code style="font-family: var(--font-mono);">\draw[thick, red]</code>) through the dominated rows or columns.
+            </p>
+          </div>
+        </div>
+
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">Classic Matrix Presets Included:</h3>
+        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+          <span class="nav-badge">Prisoner's Dilemma</span>
+          <span class="nav-badge">Battle of the Sexes</span>
+          <span class="nav-badge">Matching Pennies</span>
+          <span class="nav-badge">Stag Hunt</span>
+          <span class="nav-badge">Hawk-Dove / Chicken</span>
+          <span class="nav-badge">Rock-Paper-Scissors</span>
+          <span class="nav-badge">Cournot 3x3 Discretized</span>
+        </div>
+      </section>
+
+      <!-- SECTION 3: Game Stages & Timing -->
+      <section id="gametiming" class="help-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            3. Game Stages &amp; Timing Studio
+          </h2>
+          <span class="help-chip" style="background: #e0e7ff; color: #4338ca;">GameTiming.html</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.25rem;">
+          The Game Stages Studio visualizes the <strong>timing of the game</strong> for dynamic microeconomic and contract theory papers.
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+          <strong style="color: #059669; display: block; margin-bottom: 0.35rem;">Timing Components &amp; Syntax</strong>
+          <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5;">
+            <li><strong>Horizontal Time Axis:</strong> Directed line with ticks at discrete time periods: $t = 0, 1, 2, \dots$</li>
+            <li><strong>Active Mover Badges:</strong> Identifies which player acts at each stage (e.g., Nature, Principal, Agent, Sender, Receiver).</li>
+            <li><strong>Action Sets &amp; Signals:</strong> Mathematical descriptions of chosen contracts $w(y)$, signal levels $e$, or price quotes $p$.</li>
+            <li><strong>Information &amp; Beliefs:</strong> Notes whether choices are public or private, and denotes Bayesian posterior updates $\mu(\theta \mid e)$.</li>
+            <li><strong>Phase Brackets:</strong> TikZ <code style="font-family: var(--font-mono);">decorations.pathreplacing</code> curly braces grouping multiple stages into contractual phases.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- SECTION 4: LaTeX & Overleaf Preamble -->
+      <section id="latex-preamble" class="help-section-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-text-main); margin: 0;">
+            4. LaTeX &amp; Overleaf Integration Guide
+          </h2>
+          <span class="help-chip" style="background: #e0e7ff; color: #4338ca;">Compilation</span>
+        </div>
+        <p style="font-size: 0.95rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1rem;">
+          All code generated by Game Theory TikZ Studio is self-contained and compiles with standard LaTeX engines (pdfLaTeX, XeLaTeX, LuaLaTeX).
+        </p>
+
+        <div style="background: #0f172a; border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem;">
+          <div style="color: #94a3b8; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Recommended LaTeX Document Preamble</div>
+          <pre style="margin: 0; font-family: var(--font-mono); font-size: 0.825rem; color: #e2e8f0; line-height: 1.5; overflow-x: auto;"><code>\documentclass[border=8pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath, amssymb}
+
+% Essential TikZ libraries used by the studios:
+\usetikzlibrary{calc}                     % Coordinate mathematics
+\usetikzlibrary{matrix}                   % Bimatrix normal-form grids
+\usetikzlibrary{positioning}              % Relative node placement
+\usetikzlibrary{decorations.pathreplacing}% Curly braces for timing phases
+
+\begin{document}
+  % Paste your generated \begin{tikzpicture} ... \end{tikzpicture} here
+\end{document}</code></pre>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #0f172a; display: block; margin-bottom: 0.35rem;">1-Click Overleaf Launch</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Clicking <strong>Open in Overleaf</strong> submits the full standalone document directly to Overleaf via their official API, immediately creating a live compiling project in a new browser tab.
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
+            <strong style="color: #0f172a; display: block; margin-bottom: 0.35rem;">Snippet vs Standalone</strong>
+            <p style="font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.45; margin: 0;">
+              Use <strong>TikZ Snippet</strong> if inserting a figure into an existing paper (<code style="font-family: var(--font-mono);">\begin{figure}\centering ... \end{figure}</code>). Use <strong>Full Document</strong> if compiling a dedicated standalone vector image.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    function activateHelpTab(el) {
+      document.querySelectorAll('.help-tab-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      el.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

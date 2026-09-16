@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Theory TikZ Studio</title>
+  <meta name="description" content="Interactive LaTeX TikZ diagram generator for extensive-form game trees, normal-form payoff matrices, and dynamic game timing." />
+  <meta property="og:title" content="Game Theory TikZ Studio" />
+  <meta property="og:description" content="Interactive LaTeX TikZ diagram generator for extensive-form game trees, normal-form payoff matrices, and dynamic game timing." />
+  <link rel="stylesheet" href="css/modern.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo" id="brand-link">
+        <div class="brand-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">GT</div>
+        <div class="brand-text">
+          <span class="brand-title">Game Theory TikZ Studio</span>
+          <span class="brand-subtitle">Strategic &amp; Extensive Forms</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li class="nav-item active"><a href="index.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Overview
+        </a></li>
+        <li class="nav-item"><a href="GameTree.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><line x1="12" y1="8" x2="6" y2="16"/><line x1="12" y1="8" x2="18" y2="16"/></svg>
+          Extensive Form (Trees)
+        </a></li>
+        <li class="nav-item"><a href="PayoffMatrix.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Strategic Form (Matrices)
+        </a></li>
+        <li class="nav-item"><a href="GameTiming.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Game Stages (Timing)
+        </a></li>
+        <li class="nav-item"><a href="Help.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Docs &amp; Guide
+        </a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="main-wrapper">
+    <div style="text-align: center; max-width: 800px; margin: 2rem auto 2.5rem;">
+      <span class="nav-badge" style="margin-bottom: 0.75rem; background: #e0e7ff; color: #3730a3; font-weight: 700;">Game Theory LaTeX Suite</span>
+      <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; color: var(--color-text-main); margin-bottom: 0.85rem; line-height: 1.2;">
+        Design Beautiful Game Theory Figures in TikZ
+      </h1>
+      <p style="font-size: 1.05rem; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 1.75rem;">
+        An interactive suite crafted specifically for economists, mathematicians, and educators. Build extensive-form game trees with information sets, strategic-form bimatrix payoff grids with best-response underlines, and dynamic game timing sequences—ready for Overleaf.
+      </p>
+      <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+        <a href="GameTree.html" class="btn-modern btn-modern-primary" style="padding: 0.65rem 1.35rem; font-size: 0.95rem; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><line x1="12" y1="8" x2="6" y2="16"/><line x1="12" y1="8" x2="18" y2="16"/></svg>
+          Extensive Form (Trees)
+        </a>
+        <a href="PayoffMatrix.html" class="btn-modern btn-modern-primary" style="padding: 0.65rem 1.35rem; font-size: 0.95rem; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Strategic Form (Matrices)
+        </a>
+        <a href="GameTiming.html" class="btn-modern btn-modern-primary" style="padding: 0.65rem 1.35rem; font-size: 0.95rem; background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Game Stages (Timing)
+        </a>
+        <a href="Help.html" class="btn-modern btn-modern-secondary" style="padding: 0.65rem 1.15rem; font-size: 0.95rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Docs &amp; Guide
+        </a>
+      </div>
+    </div>
+
+    <!-- Beginner-Friendly Quick Start & Roadmap Banner -->
+    <div class="control-card" style="padding: 1.5rem; margin-bottom: 2.25rem; background: #ffffff; border-left: 4px solid #10b981;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+        <div>
+          <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 999px;">Beginner Friendly</span>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--color-text-main); margin: 0.35rem 0 0.2rem;">New to Game Theory? Which Tool Do You Need?</h2>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin: 0; line-height: 1.5;">
+            Choose the right representation for your problem in 5 seconds. No LaTeX knowledge required — customize values visually and copy clean LaTeX or download images anytime.
+          </p>
+        </div>
+        <a href="Help.html#game-theory-101" class="beginner-btn-guide" style="font-size: 0.825rem; padding: 0.4rem 0.85rem;">
+          📖 Read Game Theory 101 Primer &rarr;
+        </a>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+        <!-- Option 1: Tree -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.4rem; color: #4f46e5; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem;">
+              <span>🌳</span>
+              <span>Sequential Moves (Turns)</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.45; margin-bottom: 0.65rem;">
+              Players choose <strong>one after another</strong> (e.g., Player 1 moves, then Player 2 reacts, or Nature flips a coin).
+            </p>
+            <div style="font-size: 0.75rem; color: #475569; background: #ffffff; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.75rem; line-height: 1.4;">
+              <strong>Best for:</strong> Market entry deterrence, bargaining, chess/poker turns, backward induction, subgame perfection.
+            </div>
+          </div>
+          <a href="GameTree.html" class="btn-modern btn-modern-secondary" style="font-size: 0.78rem; width: 100%; justify-content: center; font-weight: 600; color: #4f46e5;">
+            Use Game Tree Studio &rarr;
+          </a>
+        </div>
+
+        <!-- Option 2: Matrix -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.4rem; color: #0284c7; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem;">
+              <span>📊</span>
+              <span>Simultaneous Moves (At Once)</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.45; margin-bottom: 0.65rem;">
+              Both players choose their actions <strong>at the same time</strong> without knowing what the other picked.
+            </p>
+            <div style="font-size: 0.75rem; color: #475569; background: #ffffff; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.75rem; line-height: 1.4;">
+              <strong>Best for:</strong> Prisoner's dilemma, rock-paper-scissors, finding pure/mixed Nash equilibria, dominated strategies.
+            </div>
+          </div>
+          <a href="PayoffMatrix.html" class="btn-modern btn-modern-secondary" style="font-size: 0.78rem; width: 100%; justify-content: center; font-weight: 600; color: #0284c7;">
+            Use Payoff Matrix Studio &rarr;
+          </a>
+        </div>
+
+        <!-- Option 3: Timing -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.4rem; color: #059669; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem;">
+              <span>⏱️</span>
+              <span>Multi-Stage Timeline (t=0, 1, 2)</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted); line-height: 1.45; margin-bottom: 0.65rem;">
+              Illustrates the <strong>chronological stages of a model</strong> (who moves, what contract is signed, what signals are sent).
+            </p>
+            <div style="font-size: 0.75rem; color: #475569; background: #ffffff; padding: 0.5rem; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 0.75rem; line-height: 1.4;">
+              <strong>Best for:</strong> Job market signaling, principal-agent moral hazard, adverse selection, multi-period economics papers.
+            </div>
+          </div>
+          <a href="GameTiming.html" class="btn-modern btn-modern-secondary" style="font-size: 0.78rem; width: 100%; justify-content: center; font-weight: 600; color: #059669;">
+            Use Game Stages Studio &rarr;
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Concept Glossary (Jargon Buster) -->
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.85rem 1rem;">
+        <div style="font-size: 0.8rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Game Theory Jargon Buster (Key Terms Explained in Plain English)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; font-size: 0.78rem; color: var(--color-text-muted); line-height: 1.4;">
+          <div>
+            <strong style="color: #0f172a;">Payoff $(u_1, u_2)$:</strong> The reward or score. <em>Crucial rule:</em> The 1st number is Player 1's score; the 2nd number is Player 2's score.
+          </div>
+          <div>
+            <strong style="color: #0f172a;">Nash Equilibrium:</strong> A stable outcome where no player regrets their choice given what the other player picked.
+          </div>
+          <div>
+            <strong style="color: #0f172a;">Information Set:</strong> Dashed line connecting tree nodes when a player doesn't know which previous move was made.
+          </div>
+          <div>
+            <strong style="color: #0f172a;">Backward Induction:</strong> Solving a game from the end back to the start to find the rational path (Subgame Perfect Equilibrium).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The 3 Game Theory Pillar Studios -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.75rem;">
+      
+      <!-- 1. Extensive Form Game Tree Card -->
+      <div class="control-card" style="padding: 0; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; border-top: 4px solid #4f46e5;">
+        <div style="height: 170px; overflow: hidden; position: relative; background: #1e1b4b;">
+          <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80" alt="Extensive Form Game Tree Illustration" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.35s ease; filter: brightness(0.88);">
+          <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(30,27,75,0.2) 0%, rgba(30,27,75,0.75) 100%); pointer-events: none;"></div>
+          <span style="position: absolute; top: 10px; left: 10px; background: rgba(30, 27, 75, 0.88); color: #ffffff; font-size: 0.725rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 9999px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 0.35rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><line x1="12" y1="8" x2="6" y2="16"/><line x1="12" y1="8" x2="18" y2="16"/></svg>
+            Extensive-Form Studio
+          </span>
+          <span style="position: absolute; bottom: 10px; right: 10px; background: rgba(30, 27, 75, 0.75); color: #c7d2fe; font-size: 0.68rem; font-family: var(--font-mono); padding: 0.15rem 0.45rem; border-radius: 4px; backdrop-filter: blur(4px);">
+            tikz: game tree &amp; SPNE
+          </span>
+        </div>
+        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
+          <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--color-text-main); margin-bottom: 0.35rem;">
+            Extensive-Form Game Trees
+          </h2>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.55; margin-bottom: 0.85rem;">
+            Build sequential decision trees, chance/nature probability branches, and terminal payoff tuples $(u_1, u_2)$. Supports imperfect information sets (dashed arcs), backward induction, and Subgame Perfect Nash Equilibrium (SPNE) path highlighting.
+          </p>
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <span class="nav-badge">25 Game Presets</span>
+            <span class="nav-badge">Information Sets</span>
+            <span class="nav-badge">Nature Draws</span>
+            <span class="nav-badge">Backward Induction</span>
+          </div>
+          <div style="margin-top: auto;">
+            <a href="GameTree.html" class="btn-modern btn-modern-primary" style="width: 100%; padding: 0.55rem 1rem; font-size: 0.875rem; justify-content: center; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+              Open Extensive-Form Studio &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Strategic Form Payoff Matrix Card -->
+      <div class="control-card" style="padding: 0; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; border-top: 4px solid #0284c7;">
+        <div style="height: 170px; overflow: hidden; position: relative; background: #0c4a6e;">
+          <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80" alt="Payoff Matrix &amp; Bimatrix Games Illustration" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.35s ease; filter: brightness(0.88);">
+          <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,74,110,0.2) 0%, rgba(12,74,110,0.75) 100%); pointer-events: none;"></div>
+          <span style="position: absolute; top: 10px; left: 10px; background: rgba(12, 74, 110, 0.88); color: #ffffff; font-size: 0.725rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 9999px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 0.35rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            Strategic-Form Studio
+          </span>
+          <span style="position: absolute; bottom: 10px; right: 10px; background: rgba(12, 74, 110, 0.75); color: #bae6fd; font-size: 0.68rem; font-family: var(--font-mono); padding: 0.15rem 0.45rem; border-radius: 4px; backdrop-filter: blur(4px);">
+            tikz: matrix of nodes
+          </span>
+        </div>
+        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
+          <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--color-text-main); margin-bottom: 0.35rem;">
+            Strategic-Form Payoff Matrices
+          </h2>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.55; margin-bottom: 0.85rem;">
+            Generate $2\times 2$, $2\times 3$, $3\times 3$, and $N\times M$ bimatrix games. Features automatic best-response underlining ($\underline{u_1}, \underline{u_2}$), pure Nash equilibrium highlights, iterated deletion of dominated strategies (IESDS), and mixed strategy weights.
+          </p>
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <span class="nav-badge">20 Matrix Presets</span>
+            <span class="nav-badge">Best Responses</span>
+            <span class="nav-badge">Nash Highlights</span>
+            <span class="nav-badge">IESDS Strike-outs</span>
+          </div>
+          <div style="margin-top: auto;">
+            <a href="PayoffMatrix.html" class="btn-modern btn-modern-primary" style="width: 100%; padding: 0.55rem 1rem; font-size: 0.875rem; justify-content: center; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+              Open Strategic-Form Studio &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Dynamic Stages & Timing Card -->
+      <div class="control-card" style="padding: 0; overflow: hidden; background: #ffffff; display: flex; flex-direction: column; border-top: 4px solid #059669;">
+        <div style="height: 170px; overflow: hidden; position: relative; background: #064e3b;">
+          <img src="https://images.unsplash.com/photo-1501139083538-0139583c060f?auto=format&fit=crop&w=800&q=80" alt="Dynamic Game Timing and Stages Illustration" referrerpolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.35s ease; filter: brightness(0.88);">
+          <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,78,59,0.2) 0%, rgba(6,78,59,0.75) 100%); pointer-events: none;"></div>
+          <span style="position: absolute; top: 10px; left: 10px; background: rgba(6, 78, 59, 0.88); color: #ffffff; font-size: 0.725rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 9999px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 0.35rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Game Timing Studio
+          </span>
+          <span style="position: absolute; bottom: 10px; right: 10px; background: rgba(6, 78, 59, 0.75); color: #a7f3d0; font-size: 0.68rem; font-family: var(--font-mono); padding: 0.15rem 0.45rem; border-radius: 4px; backdrop-filter: blur(4px);">
+            tikz: stages t=0,1,2...
+          </span>
+        </div>
+        <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
+          <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--color-text-main); margin-bottom: 0.35rem;">
+            Game Stages &amp; Timing
+          </h2>
+          <p style="color: var(--color-text-muted); font-size: 0.875rem; line-height: 1.55; margin-bottom: 0.85rem;">
+            Illustrate the chronological sequence of moves ($t=0, 1, 2\dots$) in dynamic economic models. Specify active movers, actions taken, information revelation, and Bayesian belief updates with curly bracket phase groupings.
+          </p>
+          <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <span class="nav-badge">14 Sequence Presets</span>
+            <span class="nav-badge">Periods $t=0,1,2$</span>
+            <span class="nav-badge">Active Movers</span>
+            <span class="nav-badge">Phase Braces</span>
+          </div>
+          <div style="margin-top: auto;">
+            <a href="GameTiming.html" class="btn-modern btn-modern-primary" style="width: 100%; padding: 0.55rem 1rem; font-size: 0.875rem; justify-content: center; background: linear-gradient(135deg, #059669 0%, #047857 100%);">
+              Open Game Stages Studio &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Academic & LaTeX Advantages -->
+    <div class="control-card" style="padding: 1.75rem; margin-bottom: 2.5rem; background: #ffffff;">
+      <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--color-text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Built Specifically for Academic Game Theory
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 0.35rem;">100% Native TikZ Libraries</h3>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.55;">
+            All generated code uses standard <code style="font-family: var(--font-mono); color: #4f46e5;">\usetikzlibrary{calc, matrix, positioning}</code>. Zero third-party or obscure package requirements—guaranteed to compile on Overleaf and TeX Live without errors.
+          </p>
+        </div>
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 0.35rem;">LaTeX Math Formatting</h3>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.55;">
+            Native support for payoff formulas like $(\pi - c, c)$, discount factors $\delta^t$, prior probabilities $p, 1-p$, and information states $\theta \in \{\theta_L, \theta_H\}$.
+          </p>
+        </div>
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 700; color: #1e1b4b; margin-bottom: 0.35rem;">Publication-Ready Diagrams</h3>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.55;">
+            Direct 1-click export to Overleaf, copyable snippet or standalone document, downloadable <code style="font-family: var(--font-mono);">.tex</code>, and high-resolution PNG/SVG images for slides and manuscripts.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--color-border); padding: 1.5rem; text-align: center; color: var(--color-text-muted); font-size: 0.825rem; background: #ffffff;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-weight: 700; color: var(--color-text-main);">Game Theory TikZ Studio</span>
+        <span>&bull;</span>
+        <span>Strategic &amp; Extensive Form Generator for LaTeX</span>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <a href="GameTree.html">Extensive Form</a>
+        <a href="PayoffMatrix.html">Payoff Matrices</a>
+        <a href="GameTiming.html">Game Stages</a>
+        <a href="Help.html">Documentation</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

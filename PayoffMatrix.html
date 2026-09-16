@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Form Payoff Matrix - Game Theory TikZ Studio</title>
+  <meta name="description" content="Design 2x2, 2x3, 3x3, and NxM strategic-form bimatrix games with best-response underlines, Nash equilibrium highlights, IESDS dominated strategy strike-outs, and export to pure TikZ." />
+  <meta property="og:title" content="Strategic Form Payoff Matrix - Game Theory TikZ Studio" />
+  <meta property="og:description" content="Design 2x2, 2x3, 3x3, and NxM strategic-form bimatrix games with best-response underlines, Nash equilibrium highlights, and export to pure TikZ." />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/latex.css">
+  <link rel="stylesheet" href="css/modern.css">
+
+  <!-- Core Scripts -->
+  <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+  <script type="text/javascript" src="js/modern-ui.js"></script>
+  <script type="text/javascript" src="js/export-png.js"></script>
+  <script type="text/javascript" src="js/payoff-matrix.js"></script>
+
+  <style>
+    .matrix-size-btn.active {
+      background-color: var(--color-primary, #4f46e5) !important;
+      color: #ffffff !important;
+      border-color: var(--color-primary, #4f46e5) !important;
+    }
+    .ne-indicator-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-logo" id="brand-link">
+        <div class="brand-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">GT</div>
+        <div class="brand-text">
+          <span class="brand-title">Game Theory TikZ Studio</span>
+          <span class="brand-subtitle">Strategic &amp; Extensive Forms</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li class="nav-item"><a href="index.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Overview
+        </a></li>
+        <li class="nav-item"><a href="GameTree.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><line x1="12" y1="8" x2="6" y2="16"/><line x1="12" y1="8" x2="18" y2="16"/></svg>
+          Extensive Form (Trees)
+        </a></li>
+        <li class="nav-item active"><a href="PayoffMatrix.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          Strategic Form (Matrices)
+        </a></li>
+        <li class="nav-item"><a href="GameTiming.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Game Stages (Timing)
+        </a></li>
+        <li class="nav-item"><a href="Help.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Docs &amp; Guide
+        </a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-wrapper">
+
+    <!-- Action Toolbar -->
+    <div class="toolbar-card">
+      <div class="toolbar-title-group">
+        <h1 class="toolbar-title">Normal-Form Payoff Matrix Studio</h1>
+        <span class="nav-badge" id="matrix-info-badge">Bimatrix Game $(u_1, u_2)$</span>
+      </div>
+
+      <!-- Quick Preset & Main Actions -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-text-muted);">Model Preset:</span>
+        <select id="matrix-preset-select" class="select-modern" onchange="onSelectPreset(this.value);" style="font-size: 0.8rem; font-weight: 500; padding: 0.3rem 0.6rem; min-width: 220px;">
+          <optgroup label="Classic Social Dilemmas &amp; Public Goods">
+            <option value="prisoners-dilemma" selected>Prisoner's Dilemma (2x2)</option>
+            <option value="public-goods-2x2">Public Goods Contribution Game (2x2)</option>
+            <option value="volunteer-dilemma">Volunteer's Dilemma (Whistleblower Alarm 2x2)</option>
+            <option value="arms-race">Arms Race &amp; Bilateral Disarmament (2x2)</option>
+          </optgroup>
+          <optgroup label="Coordination, Trust &amp; Crises">
+            <option value="battle-of-sexes">Battle of the Sexes (Bach or Stravinsky)</option>
+            <option value="stag-hunt">Stag Hunt (Payoff vs. Risk Dominance)</option>
+            <option value="schelling-point">Schelling Focal Point (Meeting in NYC 3x3)</option>
+            <option value="bank-run-2x2">Diamond-Dybvig Bank Run (2x2)</option>
+            <option value="technology-adoption">Technology Adoption &amp; Standards (2x2)</option>
+          </optgroup>
+          <optgroup label="Zero-Sum, Mixed Strategies &amp; Sports">
+            <option value="matching-pennies">Matching Pennies (Zero-Sum 2x2)</option>
+            <option value="rock-paper-scissors">Rock-Paper-Scissors (Zero-Sum 3x3)</option>
+            <option value="penalty-kick">Penalty Kick Game (Empirical Soccer 2x2)</option>
+          </optgroup>
+          <optgroup label="Industrial Organization &amp; Spatial Competition">
+            <option value="cournot-discrete">Cournot Duopoly Discrete (3x3)</option>
+            <option value="bertrand-discrete">Bertrand Price Competition Discrete (3x3)</option>
+            <option value="hotelling-location">Hotelling Beach Location Game (3x3)</option>
+            <option value="pollution-abatement">Tragedy of the Commons / Pollution Abatement (3x3)</option>
+          </optgroup>
+          <optgroup label="Dominance, Anti-Coordination &amp; Solvability">
+            <option value="hawk-dove">Hawk-Dove / Chicken (Anti-Coordination 2x2)</option>
+            <option value="iesds-3x3">Iterated Deletion of Dominated Strategies (IESDS 3x3)</option>
+            <option value="asymmetric-attrition">War of Attrition (Concession Timing 3x3)</option>
+            <option value="centipede-matrix">Centipede Game (Normal Form 3x3)</option>
+          </optgroup>
+        </select>
+
+        <button type="button" class="btn-modern btn-modern-secondary" onclick="openPresetModal();" style="font-size: 0.8rem; padding: 0.32rem 0.65rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Browse Library (20)
+        </button>
+
+        <button type="button" class="beginner-btn-guide" onclick="openBeginnerGuideModal();" title="Game Theory 101 &amp; Payoff Matrix Guide">
+          🎓 Beginner Guide
+        </button>
+
+        <div style="height: 20px; width: 1px; background: var(--color-border); margin: 0 0.2rem;"></div>
+
+        <button type="button" class="btn-modern btn-modern-secondary" onclick="PayoffMatrixApp.computeBestResponses(); showToast('Recomputed Best Responses &amp; Nash Equilibria');" style="font-size: 0.8rem; padding: 0.32rem 0.65rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Auto Best Responses
+        </button>
+
+        <button type="button" class="btn-modern btn-modern-secondary btn-toggle-sidebar" id="btn-toggle-sidebar" onclick="toggleStudioSidebar();" title="Toggle Tool Configuration Sidebar (Ctrl+B)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+          <span class="sidebar-toggle-label">Hide Tools</span>
+        </button>
+
+        <button type="button" class="btn-modern btn-modern-secondary btn-mobile-drawer-toggle" onclick="toggleStudioDrawer(true);" title="Open Tool Settings Drawer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+          Tools
+        </button>
+
+        <button type="button" class="btn-modern btn-modern-primary" onclick="copyTikZ();" style="font-size: 0.8rem; padding: 0.32rem 0.85rem; font-weight: 600;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy TikZ Code
+        </button>
+
+        <button type="button" class="btn-modern btn-modern-secondary" onclick="downloadTex();" style="font-size: 0.8rem; padding: 0.32rem 0.65rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .tex
+        </button>
+      </div>
+    </div>
+
+    <!-- Workspace Layout: Left Editor, Center Canvas Preview, Right TikZ Code -->
+    <div class="studio-workspace-3col" id="studio-workspace">
+      
+      <!-- LEFT COLUMN: Dimensions, Players & Strategy Controls / Mobile Drawer -->
+      <aside class="studio-config-drawer" id="studio-config-drawer" aria-label="Payoff Matrix Configuration">
+        <!-- Drawer Header for Mobile & Desktop -->
+        <div class="drawer-header-bar">
+          <div class="drawer-header-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            <span>Matrix &amp; Players</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <button type="button" class="btn-sidebar-collapse desktop-only" onclick="toggleStudioSidebar();" title="Collapse sidebar to maximize canvas space (Ctrl+B)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+              <span>Collapse</span>
+            </button>
+            <button type="button" class="drawer-close-btn mobile-only" onclick="toggleStudioDrawer(false);" aria-label="Close configuration drawer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="drawer-scroll-body">
+        
+        <!-- Game Details Card -->
+        <div class="control-card">
+          <h2 class="section-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Game Configuration
+          </h2>
+
+          <div style="margin-bottom: 0.75rem;">
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Game Title:</label>
+            <input type="text" id="matrix-title-input" class="input-modern" style="width: 100%; font-size: 0.825rem;" oninput="PayoffMatrixApp.updateTitle(this.value);" />
+            <span class="beginner-hint-text">Descriptive title (e.g. Prisoner's Dilemma). Plain text accepted!</span>
+          </div>
+
+          <!-- Dimension Buttons -->
+          <div style="margin-bottom: 0.75rem;">
+            <label style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); display: block; margin-bottom: 0.35rem;">Matrix Dimensions:</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem;">
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(2, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 2</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(2, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 3</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(3, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 2</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(3, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 3</button>
+            </div>
+            <span class="beginner-hint-text">Number of choices available to Player 1 (Rows) &times; Player 2 (Columns).</span>
+          </div>
+
+          <!-- Styling Options -->
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--color-border);">
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; cursor: pointer;">
+              <span>Show Mixed Strategy Probs $(p, q)$</span>
+              <input type="checkbox" id="chk-show-probs" checked onchange="PayoffMatrixApp.setOption('showProbabilities', this.checked);">
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; cursor: pointer;">
+              <span>Diagonal Header Split ($P_1 \\ P_2$)</span>
+              <input type="checkbox" id="chk-diag-header" checked onchange="PayoffMatrixApp.setOption('showDiagonalHeader', this.checked);">
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; cursor: pointer;">
+              <span>Auto-Detect Nash Equilibrium</span>
+              <input type="checkbox" id="chk-auto-ne" checked onchange="PayoffMatrixApp.setOption('autoHighlightNE', this.checked);">
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; cursor: pointer;">
+              <span>Display NE★ Badges</span>
+              <input type="checkbox" id="chk-ne-badge" checked onchange="PayoffMatrixApp.setOption('neBadge', this.checked);">
+            </label>
+          </div>
+        </div>
+
+        <!-- Players & Strategies Configuration -->
+        <div class="control-card">
+          <h2 class="section-title" style="color: #4f46e5;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Player 1 (Row Player)
+          </h2>
+          <div style="margin-bottom: 0.5rem;">
+            <input type="text" id="p1-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #4f46e5;" placeholder="Player 1 Name" oninput="PayoffMatrixApp.updatePlayerName(1, this.value);">
+            <span class="beginner-hint-text">Chooses the row. Player 1's payoffs appear <strong>first</strong> in each cell $(u_1, \cdot)$.</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+            <span>Row Strategies</span>
+            <span>Prob $(p)$</span>
+          </div>
+          <div id="p1-strategies-container"></div>
+        </div>
+
+        <div class="control-card">
+          <h2 class="section-title" style="color: #0284c7;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Player 2 (Column Player)
+          </h2>
+          <div style="margin-bottom: 0.5rem;">
+            <input type="text" id="p2-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #0284c7;" placeholder="Player 2 Name" oninput="PayoffMatrixApp.updatePlayerName(2, this.value);">
+            <span class="beginner-hint-text">Chooses the column. Player 2's payoffs appear <strong>second</strong> in each cell $(\cdot, u_2)$.</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+            <span>Column Strategies</span>
+            <span>Prob $(q)$</span>
+          </div>
+          <div id="p2-strategies-container"></div>
+        </div>
+
+        </div><!-- /.drawer-scroll-body -->
+
+        <!-- Mobile Drawer Footer Action -->
+        <div class="drawer-footer-bar mobile-only">
+          <button type="button" class="btn-modern btn-modern-primary" style="width: 100%; justify-content: center; padding: 0.65rem;" onclick="scrollToCanvasPreview();">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            Apply &amp; View Matrix
+          </button>
+        </div>
+      </aside>
+
+      <!-- CENTER COLUMN: Canvas Visualization & Interactive Cell Editor -->
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        
+        <!-- Visual Canvas Card -->
+        <div class="control-card" id="workspace-canvas-card" style="padding: 1rem; position: relative;">
+          <!-- Beginner Tip Banner -->
+          <div class="beginner-tip-banner tip-indigo" id="matrix-beginner-tip">
+            <div class="beginner-tip-content">
+              <span>💡</span>
+              <span><strong>Beginner Rule:</strong> Player 1 (Row) payoffs are first in purple; Player 2 (Column) payoffs are second in blue. Cells with emerald background and green border are Pure Strategy Nash Equilibria.</span>
+            </div>
+            <button type="button" onclick="document.getElementById('matrix-beginner-tip').style.display='none';" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 1rem; line-height: 1;" title="Dismiss Tip">&times;</button>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <h2 style="font-size: 1rem; font-weight: 700; color: var(--color-text-main); margin: 0;">Interactive Diagram Preview</h2>
+              <span style="font-size: 0.72rem; background: #e0e7ff; color: #3730a3; padding: 2px 7px; border-radius: 999px; font-weight: 600;">Click cell to toggle NE</span>
+            </div>
+            <div style="display: flex; gap: 0.35rem;">
+              <button type="button" class="btn-modern btn-modern-secondary" onclick="exportMatrixImage('png');" style="font-size: 0.75rem; padding: 0.25rem 0.55rem;">Export PNG</button>
+              <button type="button" class="btn-modern btn-modern-secondary" onclick="exportMatrixImage('svg');" style="font-size: 0.75rem; padding: 0.25rem 0.55rem;">Export SVG</button>
+            </div>
+          </div>
+
+          <!-- Canvas Container -->
+          <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 0.5rem;">
+            <canvas id="matrix-canvas" width="680" height="460" style="max-width: 100%; height: auto; cursor: pointer;"></canvas>
+          </div>
+        </div>
+
+        <!-- Quick Payoff Editor Table -->
+        <div class="control-card" style="padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h2 class="section-title" style="margin: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              Quick Payoffs &amp; Underlines
+            </h2>
+            <div style="font-size: 0.72rem; color: var(--color-text-muted);">
+              Format: <code style="font-family: var(--font-mono); color: #4f46e5;">u1</code>, <code style="font-family: var(--font-mono); color: #0284c7;">u2</code>
+            </div>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--color-text-muted); margin-bottom: 0.5rem;">
+            Type numeric values or algebraic expressions (e.g., <code style="font-family: var(--font-mono);">3, 3</code> or <code style="font-family: var(--font-mono);">a-c, c</code>). Use the buttons below each cell to manually toggle best-response underlines or Nash equilibrium status.
+          </p>
+          <div id="matrix-editor-grid" style="overflow-x: auto;"></div>
+
+          <!-- Game Theory Insight & Equilibrium Explainer Card -->
+          <div id="matrix-insight-container"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: TikZ & LaTeX Code Output -->
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        
+        <div class="control-card" style="padding: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h2 class="section-title" style="margin: 0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              TikZ Code Output
+            </h2>
+            <button type="button" class="btn-modern btn-modern-primary" onclick="copyTikZ();" style="font-size: 0.72rem; padding: 0.25rem 0.5rem;">Copy</button>
+          </div>
+
+          <!-- Code View Tabs -->
+          <div style="display: flex; gap: 0.25rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.35rem;">
+            <button type="button" id="tab-btn-snippet" class="btn-modern btn-modern-secondary active" onclick="switchCodeTab('snippet');" style="font-size: 0.72rem; padding: 0.2rem 0.45rem;">TikZ Snippet</button>
+            <button type="button" id="tab-btn-standalone" class="btn-modern btn-modern-secondary" onclick="switchCodeTab('standalone');" style="font-size: 0.72rem; padding: 0.2rem 0.45rem;">Full Document</button>
+            <button type="button" id="tab-btn-tabular" class="btn-modern btn-modern-secondary" onclick="switchCodeTab('tabular');" style="font-size: 0.72rem; padding: 0.2rem 0.45rem;">LaTeX Tabular</button>
+          </div>
+
+          <!-- Snippet View -->
+          <div id="code-panel-snippet">
+            <textarea id="tikz-code-area" readonly class="code-area-modern" style="width: 100%; height: 320px; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem; line-height: 1.4; border: 1px solid var(--color-border); border-radius: 6px; background: #0f172a; color: #e2e8f0; resize: vertical;"></textarea>
+          </div>
+
+          <!-- Standalone View -->
+          <div id="code-panel-standalone" style="display: none;">
+            <textarea id="standalone-code-area" readonly class="code-area-modern" style="width: 100%; height: 320px; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem; line-height: 1.4; border: 1px solid var(--color-border); border-radius: 6px; background: #0f172a; color: #e2e8f0; resize: vertical;"></textarea>
+          </div>
+
+          <!-- Tabular View -->
+          <div id="code-panel-tabular" style="display: none;">
+            <textarea id="tabular-code-area" readonly class="code-area-modern" style="width: 100%; height: 320px; font-family: var(--font-mono); font-size: 0.75rem; padding: 0.6rem; line-height: 1.4; border: 1px solid var(--color-border); border-radius: 6px; background: #0f172a; color: #e2e8f0; resize: vertical;"></textarea>
+          </div>
+
+          <div style="margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <button type="button" class="btn-modern btn-modern-secondary" onclick="openInOverleaf();" style="width: 100%; font-size: 0.78rem; justify-content: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Open in Overleaf
+            </button>
+            <button type="button" class="btn-modern btn-modern-secondary" onclick="downloadTex();" style="width: 100%; font-size: 0.78rem; justify-content: center; gap: 0.4rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download .tex Document
+            </button>
+          </div>
+        </div>
+
+        <!-- Academic Cheatsheet Card -->
+        <div class="control-card" style="padding: 1rem; background: #f8fafc;">
+          <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-main); margin-bottom: 0.35rem;">TikZ Package Guide</h3>
+          <p style="font-size: 0.75rem; color: var(--color-text-muted); line-height: 1.45; margin-bottom: 0.45rem;">
+            All code utilizes standard TikZ matrix library (<code style="font-family: var(--font-mono); color: #4f46e5;">\usetikzlibrary{matrix}</code>). No custom non-standard packages required.
+          </p>
+          <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 6px; padding: 0.5rem; font-family: var(--font-mono); font-size: 0.7rem; color: #334155; line-height: 1.4;">
+            \usepackage{tikz}<br>
+            \usetikzlibrary{matrix, calc, positioning}
+          </div>
+
+          <!-- Code Anatomy Breakdown for Beginners -->
+          <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border);">
+            <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-main); margin: 0 0 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+              <span>📖</span> Understanding the TikZ Code
+            </h4>
+            <ul style="font-size: 0.72rem; color: var(--color-text-muted); padding-left: 1.1rem; margin: 0; line-height: 1.45;">
+              <li><code>\matrix (M) [matrix of nodes]</code>: Creates an addressable grid where cell at row $r$, col $c$ is named <code>(M-r-c)</code>.</li>
+              <li><code>column 1/.style</code>: Styles Player 1's action names along the left edge.</li>
+              <li><code>row 1/.style</code>: Styles Player 2's action names along the top edge.</li>
+              <li><code>\underline{u_1}</code>: LaTeX underline denoting Player 1's best response to that column.</li>
+              <li><code>nebg / neborder</code>: Highlights pure Nash Equilibria with mutual best responses.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Presets Gallery Modal Dialog -->
+  <div id="preset-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 1rem;" onclick="if (event.target === this) closePresetModal();">
+    <div style="background: var(--color-surface, #ffffff); border-radius: 12px; width: 100%; max-width: 960px; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid var(--color-border); overflow: hidden;">
+      
+      <div style="padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; background: var(--color-surface-sunken, #f8fafc);">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--color-text-main);">Strategic Form Preset Library</h3>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #4338ca; padding: 2px 8px; border-radius: 999px;">20 Academic Models</span>
+          </div>
+          <p style="margin: 0.35rem 0 0; font-size: 0.825rem; color: var(--color-text-muted);">
+            Pre-configured classic bimatrix games complete with equilibrium analyses, best-response underlines, and strategy partitions.
+          </p>
+        </div>
+        <button type="button" onclick="closePresetModal();" class="btn-modern btn-modern-secondary" style="padding: 0.4rem 0.65rem; font-size: 0.85rem;" title="Close dialog">✕ Close</button>
+      </div>
+
+      <div id="modal-presets-grid" style="padding: 1.25rem 1.5rem; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; flex: 1;"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 100000; pointer-events: none;"></div>
+
+  <script>
+    // Local Page Helpers
+    function onSelectPreset(presetId) {
+      if (window.PayoffMatrixApp) {
+        PayoffMatrixApp.loadPreset(presetId);
+        showToast('Loaded preset: ' + presetId);
+      }
+    }
+
+    function onSetDimensions(rows, cols, btn) {
+      document.querySelectorAll('.matrix-size-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      if (window.PayoffMatrixApp) {
+        PayoffMatrixApp.setDimensions(rows, cols);
+        showToast('Matrix size set to ' + rows + ' × ' + cols);
+      }
+    }
+
+    function switchCodeTab(tab) {
+      document.querySelectorAll('#tab-btn-snippet, #tab-btn-standalone, #tab-btn-tabular').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById('code-panel-snippet').style.display = 'none';
+      document.getElementById('code-panel-standalone').style.display = 'none';
+      document.getElementById('code-panel-tabular').style.display = 'none';
+
+      if (tab === 'snippet') {
+        document.getElementById('tab-btn-snippet').classList.add('active');
+        document.getElementById('code-panel-snippet').style.display = 'block';
+      } else if (tab === 'standalone') {
+        document.getElementById('tab-btn-standalone').classList.add('active');
+        document.getElementById('code-panel-standalone').style.display = 'block';
+      } else if (tab === 'tabular') {
+        document.getElementById('tab-btn-tabular').classList.add('active');
+        document.getElementById('code-panel-tabular').style.display = 'block';
+      }
+    }
+
+    function copyTikZ() {
+      var currentTab = document.querySelector('#tab-btn-standalone.active') ? 'standalone' :
+                       document.querySelector('#tab-btn-tabular.active') ? 'tabular' : 'snippet';
+      var text = "";
+      if (currentTab === 'standalone') {
+        text = document.getElementById('standalone-code-area').value;
+      } else if (currentTab === 'tabular') {
+        text = document.getElementById('tabular-code-area').value;
+      } else {
+        text = document.getElementById('tikz-code-area').value;
+      }
+
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copied code to clipboard!');
+      }).catch(function() {
+        showToast('Failed to copy code');
+      });
+    }
+
+    function downloadTex() {
+      var code = document.getElementById('standalone-code-area').value;
+      var title = (PayoffMatrixApp.getState().title || "matrix").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      var blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = title + "-payoff-matrix.tex";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Downloaded ' + a.download);
+    }
+
+    function openInOverleaf() {
+      var code = document.getElementById('standalone-code-area').value;
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = 'https://www.overleaf.com/docs';
+      form.target = '_blank';
+
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'snip';
+      input.value = code;
+
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+
+    function exportMatrixImage(format) {
+      var canvas = document.getElementById('matrix-canvas');
+      if (!canvas) return;
+      var link = document.createElement('a');
+      link.download = (PayoffMatrixApp.getState().title || "matrix").toLowerCase().replace(/[^a-z0-9]+/g, "-") + '.' + format;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Exported diagram as ' + format.toUpperCase());
+    }
+
+    function showToast(msg) {
+      var container = document.getElementById('toast-container');
+      if (!container) return;
+      var toast = document.createElement('div');
+      toast.style.background = '#0f172a';
+      toast.style.color = '#ffffff';
+      toast.style.padding = '0.55rem 1rem';
+      toast.style.borderRadius = '6px';
+      toast.style.fontSize = '0.825rem';
+      toast.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.3)';
+      toast.style.marginBottom = '0.5rem';
+      toast.style.transition = 'all 0.3s ease';
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        setTimeout(function() { toast.remove(); }, 300);
+      }, 2400);
+    }
+    window.showToast = showToast;
+
+    // Modal gallery helpers
+    function openPresetModal() {
+      var overlay = document.getElementById('preset-modal-overlay');
+      var grid = document.getElementById('modal-presets-grid');
+      if (!overlay || !grid || !PayoffMatrixApp) return;
+
+      var presets = PayoffMatrixApp.getPresets();
+      grid.innerHTML = Object.values(presets).map(function(item) {
+        var tags = (item.tags || []).map(function(t) {
+          return '<span style="font-size: 0.68rem; background: var(--color-surface-sunken, #f1f5f9); color: var(--color-text-muted); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--color-border);">' + t + '</span>';
+        }).join(' ');
+
+        return '<div style="background: var(--color-surface, #ffffff); border: 1px solid var(--color-border); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.2s ease; box-shadow: var(--shadow-sm);">' +
+          '<div>' +
+            '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem; gap: 0.5rem;">' +
+              '<span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-text-muted);">' + item.category + '</span>' +
+              '<span style="font-size: 0.68rem; font-weight: 600; color: #4f46e5; background: #eef2ff; padding: 1px 6px; border-radius: 4px;">' + (item.player1.strategies.length + '×' + item.player2.strategies.length) + '</span>' +
+            '</div>' +
+            '<h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--color-text-main); line-height: 1.3;">' + item.name + '</h4>' +
+            '<div style="font-size: 0.75rem; font-weight: 600; color: var(--color-primary, #4f46e5); margin: 0.2rem 0 0.4rem;">' + item.subtitle + '</div>' +
+            '<p style="font-size: 0.78rem; color: var(--color-text-muted); line-height: 1.45; margin: 0 0 0.65rem;">' + item.description + '</p>' +
+            '<div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.85rem;">' + tags + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<button type="button" class="btn-modern btn-modern-primary" onclick="selectPresetFromModal(\'' + item.id + '\');" style="width: 100%; font-size: 0.8rem; padding: 0.4rem 0.6rem; justify-content: center; font-weight: 600;">' +
+              'Load Model &rarr;' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      overlay.style.display = 'flex';
+    }
+
+    function closePresetModal() {
+      var overlay = document.getElementById('preset-modal-overlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function selectPresetFromModal(id) {
+      var sel = document.getElementById('matrix-preset-select');
+      if (sel) sel.value = id;
+      onSelectPreset(id);
+      closePresetModal();
+    }
+
+    // Beginner Guide Modal Controls
+    function openBeginnerGuideModal() {
+      var overlay = document.getElementById('beginner-guide-modal-overlay');
+      if (overlay) overlay.style.display = 'flex';
+    }
+
+    function closeBeginnerGuideModal() {
+      var overlay = document.getElementById('beginner-guide-modal-overlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+  </script>
+
+  <!-- Beginner Guide Modal Dialog -->
+  <div id="beginner-guide-modal-overlay" class="guide-modal-overlay" onclick="if(event.target === this) closeBeginnerGuideModal();">
+    <div class="guide-modal-container">
+      <div class="guide-modal-header">
+        <div>
+          <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #0284c7; background: #e0f2fe; padding: 2px 8px; border-radius: 999px;">Beginner Friendly</span>
+          <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--color-text-main); margin: 0.35rem 0 0.15rem;">Strategic Form &amp; Payoff Matrix 101</h3>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); margin: 0;">Everything you need to know to read and build bimatrix games</p>
+        </div>
+        <button type="button" class="btn-modern btn-modern-secondary" onclick="closeBeginnerGuideModal();" style="padding: 0.35rem 0.6rem; font-size: 0.85rem;">
+          &times; Close
+        </button>
+      </div>
+      <div class="guide-modal-body">
+        <div class="concept-box">
+          <h4 class="concept-box-title" style="color: #4f46e5;">
+            <span>1.</span> How to Read Any Cell $(u_1, u_2)$
+          </h4>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 0.5rem;">
+            In a strategic game matrix, two players pick actions simultaneously:
+          </p>
+          <ul style="font-size: 0.825rem; color: #475569; padding-left: 1.25rem; margin: 0; line-height: 1.5;">
+            <li><strong>Player 1 (Row Player):</strong> Selects which row is played. Their payoff is ALWAYS the <strong>first number</strong> ($u_1$).</li>
+            <li><strong>Player 2 (Column Player):</strong> Selects which column is played. Their payoff is ALWAYS the <strong>second number</strong> ($u_2$).</li>
+          </ul>
+        </div>
+
+        <div class="concept-box">
+          <h4 class="concept-box-title" style="color: #0284c7;">
+            <span>2.</span> The 30-Second Underline Method for Pure Nash Equilibria
+          </h4>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.5; margin: 0 0 0.5rem;">
+            How to find the Nash equilibria of any matrix in seconds:
+          </p>
+          <ol style="font-size: 0.825rem; color: #475569; padding-left: 1.25rem; margin: 0; line-height: 1.5;">
+            <li>Look down each <strong>column</strong> one by one. Find Player 1's highest payoff (the first number in each cell) and underline it.</li>
+            <li>Look across each <strong>row</strong> one by one. Find Player 2's highest payoff (the second number in each cell) and underline it.</li>
+            <li>Any cell where <strong>both numbers are underlined</strong> is a <strong>Pure Strategy Nash Equilibrium ($\text{NE}^\star$)</strong>! The app automatically highlights these in emerald green.</li>
+          </ol>
+        </div>
+
+        <div class="concept-box">
+          <h4 class="concept-box-title" style="color: #059669;">
+            <span>3.</span> What is a Dominant Strategy?
+          </h4>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.5; margin: 0;">
+            A strategy is <strong>strictly dominant</strong> if it gives a player a strictly higher payoff than all their other strategies, no matter what choice the opponent makes. (For example, in the Prisoner's Dilemma, "Defect" is a dominant strategy for both players).
+          </p>
+        </div>
+
+        <div class="concept-box">
+          <h4 class="concept-box-title" style="color: #b91c1c;">
+            <span>4.</span> What is IESDS (Iterated Elimination)?
+          </h4>
+          <p style="font-size: 0.825rem; color: var(--color-text-muted); line-height: 1.5; margin: 0;">
+            <strong>IESDS</strong> stands for Iterated Elimination of Strictly Dominated Strategies. If a row or column is always worse than another option, rational players will never play it. In this studio, click the <strong>Dominate</strong> button next to any strategy to strike it through with a red line.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

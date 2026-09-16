@@ -1,0 +1,8 @@
+{
+  "name": "Game Theory TikZ Studio",
+  "description": "Interactive LaTeX TikZ diagram generator for extensive-form game trees, normal-form payoff matrices, and dynamic game timing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
