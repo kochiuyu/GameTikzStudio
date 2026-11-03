@@ -413,8 +413,9 @@
         levelDistance: this.levelDistance,
         siblingDistance: this.siblingDistance,
         rootId: this.rootId,
-        nodes: this.nodes,
-        infoSets: this.infoSets
+        // History snapshots must not share mutable objects with the editor.
+        nodes: JSON.parse(JSON.stringify(this.nodes)),
+        infoSets: JSON.parse(JSON.stringify(this.infoSets))
       };
     }
 
@@ -426,8 +427,8 @@
       this.levelDistance = data.levelDistance || 90;
       this.siblingDistance = data.siblingDistance || 65;
       this.rootId = data.rootId;
-      this.nodes = data.nodes;
-      this.infoSets = data.infoSets || [];
+      this.nodes = JSON.parse(JSON.stringify(data.nodes));
+      this.infoSets = JSON.parse(JSON.stringify(data.infoSets || []));
       this.computeLayout();
       return true;
     }

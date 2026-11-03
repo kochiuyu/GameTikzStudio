@@ -1305,6 +1305,7 @@
   }
 
   var GameTimingApp = {
+    generateTikZCode: generateTikZCode,
     getState: function() { return timingState; },
     loadPreset: loadPreset,
     getPresets: function() { return TIMING_PRESETS; },

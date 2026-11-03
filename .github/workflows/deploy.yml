@@ -31,11 +31,19 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check and build static site
+        run: |
+          npm run check
+          npm run build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository root containing HTML, JS, and CSS files
-          path: '.'
+          path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
