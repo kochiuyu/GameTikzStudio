@@ -650,7 +650,8 @@
       if (opts.showProbabilities && p2.probabilities[c]) {
         colLabel += " \\\\[-2pt]{\\footnotesize\\color{p2color} $(" + p2.probabilities[c] + ")$}";
       }
-      headerRow.push("{" + colLabel + "}");
+      // Keep label line breaks inside a nested alignment, not the TikZ matrix.
+      headerRow.push("{\\shortstack{" + colLabel + "}}");
     }
     out.push("    " + headerRow.join(" & ") + " \\\\");
 
@@ -695,7 +696,7 @@
         }
 
         var styleStr = nodeStyle.length > 0 ? "|[" + nodeStyle.join(", ") + "]|" : "";
-        rowCells.push("    " + styleStr + " {" + cellMath + "}");
+        rowCells.push("    " + styleStr + " {\\shortstack{" + cellMath + "}}");
       }
       out.push(rowCells.join(" & ") + " \\\\");
     }

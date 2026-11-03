@@ -923,7 +923,9 @@
         var toX = (ph.to * dxNum + 1.5).toFixed(1);
         out.push("  \\draw[decorate, decoration={brace, amplitude=5pt}, thick, gray!70]");
         out.push("    (" + fromX + ", " + braceY + ") -- (" + toX + ", " + braceY + ")");
-        out.push("    node[midway, above=7pt, font=\\small\\bfseries, text=gray!90] {" + ph.name + "};");
+        // Phase titles are text; preserve explicitly escaped ampersands.
+        var phaseName = ph.name.replace(/(^|[^\\])&/g, '$1\\&');
+        out.push("    node[midway, above=7pt, font=\\small\\bfseries, text=gray!90] {" + phaseName + "};");
       });
       out.push("");
     }
@@ -1305,6 +1307,7 @@
   }
 
   var GameTimingApp = {
+    generateTikZCode: generateTikZCode,
     getState: function() { return timingState; },
     loadPreset: loadPreset,
     getPresets: function() { return TIMING_PRESETS; },

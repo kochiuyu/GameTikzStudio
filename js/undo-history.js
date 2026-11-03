@@ -721,6 +721,10 @@
     var m = window.gameTreeModel || window.model;
     if (m && typeof m.fromJSON === 'function') {
       m.fromJSON(state);
+      if (typeof window.refreshGameTreeUI === 'function') {
+        window.refreshGameTreeUI();
+        return;
+      }
       var r = window.gameTreeRenderer || window.renderer;
       if (r) r.render();
       if (typeof window.updateCodeDisplay === 'function') window.updateCodeDisplay();

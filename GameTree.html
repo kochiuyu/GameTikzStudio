@@ -583,17 +583,16 @@
         selectNode(activeTreeModel.nodes[activeTreeModel.rootId]);
       }
 
-      updateUI();
-
-      // Check for auto-saved session
+      // Restore before the first render can push the default preset to storage.
       if (window.gameTreeHistory) {
         if (window.gameTreeHistory.restoreFromStorage()) {
           canvasRenderer.model = activeTreeModel;
           canvasRenderer.fitToScreen();
-          updateUI();
           if (window.showToast) window.showToast('Restored previous game tree session');
         }
+        window.gameTreeHistory.init();
       }
+      updateUI();
     }
 
     function updateNodeDropdown() {
@@ -922,6 +921,15 @@
       updateNodeDropdown();
     }
 
+    // History replaces node objects; reconnect the inspector to the restored
+    // node and refresh every view while the history manager suppresses pushes.
+    window.refreshGameTreeUI = function () {
+      const selectedId = activeSelectedNode && activeSelectedNode.id;
+      const node = activeTreeModel.nodes[selectedId] || activeTreeModel.nodes[activeTreeModel.rootId];
+      updateUI();
+      if (node) selectNode(node);
+    };
+
     function zoomCanvas(factor) {
       canvasRenderer.scale = Math.min(Math.max(0.3, canvasRenderer.scale * factor), 3.0);
       canvasRenderer.render();
@@ -1010,10 +1018,17 @@ ${tikzCode}
 
     function downloadPNG() {
       const canvas = document.getElementById('treeCanvas');
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = 'game-tree.png';
-      a.click();
+      canvas.toBlob(function (blob) {
+        if (!blob) return;
+        const a = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        a.href = url;
+        a.download = 'game-tree.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }, 'image/png');
     }
 
     function downloadSVG() {

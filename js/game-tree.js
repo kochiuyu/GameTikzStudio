@@ -33,7 +33,9 @@
     }
 
     createNode(data = {}) {
-      const id = data.id || uniqueId();
+      let id = data.id || uniqueId();
+      // Loaded/autosaved trees can already contain IDs from a previous session.
+      while (!data.id && this.nodes[id]) id = uniqueId();
       const node = {
         id: id,
         parentId: data.parentId || null,
@@ -413,8 +415,9 @@
         levelDistance: this.levelDistance,
         siblingDistance: this.siblingDistance,
         rootId: this.rootId,
-        nodes: this.nodes,
-        infoSets: this.infoSets
+        // History snapshots must not share mutable objects with the editor.
+        nodes: JSON.parse(JSON.stringify(this.nodes)),
+        infoSets: JSON.parse(JSON.stringify(this.infoSets))
       };
     }
 
@@ -426,8 +429,8 @@
       this.levelDistance = data.levelDistance || 90;
       this.siblingDistance = data.siblingDistance || 65;
       this.rootId = data.rootId;
-      this.nodes = data.nodes;
-      this.infoSets = data.infoSets || [];
+      this.nodes = JSON.parse(JSON.stringify(data.nodes));
+      this.infoSets = JSON.parse(JSON.stringify(data.infoSets || []));
       this.computeLayout();
       return true;
     }
