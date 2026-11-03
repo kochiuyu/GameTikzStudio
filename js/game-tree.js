@@ -33,7 +33,9 @@
     }
 
     createNode(data = {}) {
-      const id = data.id || uniqueId();
+      let id = data.id || uniqueId();
+      // Loaded/autosaved trees can already contain IDs from a previous session.
+      while (!data.id && this.nodes[id]) id = uniqueId();
       const node = {
         id: id,
         parentId: data.parentId || null,

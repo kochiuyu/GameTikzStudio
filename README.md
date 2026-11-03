@@ -36,6 +36,8 @@ npm run build
 
 Checks and builds use Node built-ins and need no dependency installation. Only the local Express server needs `npm install`. `bun.lock` is retained for existing Bun/AI Studio workflows; this change does not alter dependencies.
 
+For an optional real compilation check, install a working TeX distribution with `pdflatex`, TikZ, standalone and AMS packages, then run `npm run test:latex`. It compiles matrix, timing, market-entry and signaling-tree samples, prints the output directory, and retains PDFs/logs for inspection. This optional check is separate from the dependency-free CI suite.
+
 The maintenance workflow runs on pull requests and pushes to `main`/`master`. The existing Pages workflow runs checks before uploading `dist/`; deployment still occurs only on its existing main/master push or manual triggers. Opening a pull request does not deploy it.
 
 ## Test boundaries and manual review

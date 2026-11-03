@@ -119,6 +119,49 @@ test('saved tree snapshots remain independent after saving and loading', () => {
   assert.deepEqual(plain(snapshot), original);
 });
 
+test('adding a branch after loading a tree never reuses an existing node ID', () => {
+  const first = loadBrowser('game-tree.js');
+  const snapshot = plain(treeFixture(first).toJSON());
+  const fresh = loadBrowser('game-tree.js');
+  const restored = new fresh.GameTreeModel();
+  restored.fromJSON(snapshot);
+  const added = restored.addBranch(restored.rootId, { action: 'New' });
+  assert.equal(Object.keys(restored.nodes).length, 4);
+  assert.equal(snapshot.nodes[added.id], undefined);
+  assert.notEqual(added.id, restored.rootId);
+});
+
+test('history refreshes the page while suppressing recursive history entries', () => {
+  const context = loadBrowser('game-tree.js', 'undo-history.js');
+  context.gameTreeModel = treeFixture(context);
+  const history = context.gameTreeHistory;
+  history.init();
+  context.gameTreeModel.title = 'Changed';
+  history.push('Rename');
+  let refreshed = 0;
+  context.refreshGameTreeUI = () => {
+    assert.equal(history.isRestoring, true);
+    history.push('Render');
+    refreshed++;
+  };
+  history.undo();
+  assert.equal(refreshed, 1);
+  assert.equal(history.canUndo(), false);
+  assert.equal(history.canRedo(), true);
+});
+
+test('multiline matrix cells and phase ampersands produce compilable LaTeX constructs', () => {
+  const context = loadBrowser('payoff-matrix.js', 'game-timing.js');
+  const matrix = context.PayoffMatrixApp.generateTikZCode(true);
+  assert.ok(matrix.includes('\\shortstack{Cooperate'));
+  assert.ok(matrix.includes('\\shortstack{$\\underline{1}'));
+  const timing = context.GameTimingApp;
+  timing.getState().phases = [{ from: 0, to: 1, name: 'Signaling & Screening' }];
+  assert.ok(timing.generateTikZCode(true).includes('Signaling \\& Screening'));
+  timing.getState().phases[0].name = 'Already \\& escaped';
+  assert.ok(timing.generateTikZCode(true).includes('Already \\& escaped'));
+});
+
 test('history limits and corrupt saved data are handled without losing usability', () => {
   const context = loadBrowser('game-tree.js', 'undo-history.js');
   context.gameTreeModel = treeFixture(context);
