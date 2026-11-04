@@ -98,6 +98,41 @@
     return result;
   }
 
+  // Keep controls alive during blur/change. Replacing innerHTML can remove the
+  // button under the pointer between mousedown and click, swallowing that click.
+  function patchControls(container, markup) {
+    var template = document.createElement('template');
+    template.innerHTML = markup;
+    function reconcile(parent, expected) {
+      var wanted = Array.from(expected.childNodes);
+      wanted.forEach(function (next, index) {
+        var current = parent.childNodes[index];
+        if (!current) { parent.appendChild(next.cloneNode(true)); return; }
+        if (current.nodeType !== next.nodeType || current.nodeName !== next.nodeName) {
+          parent.replaceChild(next.cloneNode(true), current);
+          return;
+        }
+        if (current.nodeType !== 1) {
+          if (current.nodeValue !== next.nodeValue) current.nodeValue = next.nodeValue;
+          return;
+        }
+        Array.from(current.attributes).forEach(function (attribute) {
+          if (!next.hasAttribute(attribute.name)) current.removeAttribute(attribute.name);
+        });
+        Array.from(next.attributes).forEach(function (attribute) {
+          if (current.getAttribute(attribute.name) !== attribute.value) current.setAttribute(attribute.name, attribute.value);
+        });
+        if (current.nodeName === 'INPUT' || current.nodeName === 'TEXTAREA') {
+          if (document.activeElement !== current && current.value !== next.value) current.value = next.value;
+        } else {
+          reconcile(current, next);
+        }
+      });
+      while (parent.childNodes.length > wanted.length) parent.removeChild(parent.lastChild);
+    }
+    reconcile(container, template.content);
+  }
+
   function create(app, studio, settings) {
     settings = settings || {};
     var defaults = clone(app.getState());
@@ -316,7 +351,7 @@
     }
     return project;
   }
-  window.StudioProject = { create: create };
+  window.StudioProject = { create: create, patchControls: patchControls };
   window.addEventListener('DOMContentLoaded', function () {
     var app = window.PayoffMatrixApp || window.GameTimingApp;
     if (!app) return;

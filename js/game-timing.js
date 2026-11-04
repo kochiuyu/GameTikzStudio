@@ -1360,7 +1360,7 @@
     var container = document.getElementById("stages-editor-list");
     if (!container) return;
 
-    container.innerHTML = timingState.stages.map(function(s, idx) {
+    var markup = timingState.stages.map(function(s, idx) {
       return '<div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.75rem; box-shadow: var(--shadow-sm);">' +
         '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">' +
           '<div style="display: flex; align-items: center; gap: 0.4rem;">' +
@@ -1388,6 +1388,8 @@
         '</div>' +
       '</div>';
     }).join('');
+    if (window.StudioProject && container.childNodes) window.StudioProject.patchControls(container, markup);
+    else container.innerHTML = markup;
   }
 
   function renderAll() {

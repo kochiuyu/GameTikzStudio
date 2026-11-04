@@ -1149,6 +1149,11 @@
   }
 
   // Render UI Controls (Inputs for Players, Strategies, Matrix grid)
+  function updateControls(container, markup) {
+    if (window.StudioProject && container.childNodes) window.StudioProject.patchControls(container, markup);
+    else container.innerHTML = markup;
+  }
+
   function renderControls() {
     var p1 = matrixState.player1;
     var p2 = matrixState.player2;
@@ -1171,7 +1176,7 @@
     // Render Strategy Inputs
     var p1StratContainer = document.getElementById("p1-strategies-container");
     if (p1StratContainer) {
-      p1StratContainer.innerHTML = p1.strategies.map(function(s, idx) {
+      updateControls(p1StratContainer, p1.strategies.map(function(s, idx) {
         var isElim = matrixState.eliminatedRows.indexOf(idx) !== -1;
         return '<div style="display: flex; gap: 0.35rem; align-items: center; margin-bottom: 0.35rem;">' +
           '<span style="font-size: 0.75rem; font-weight: 700; color: #4f46e5; width: 22px;">R' + (idx + 1) + '</span>' +
@@ -1179,12 +1184,12 @@
           '<input type="text" maxlength="10000" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + escapeMarkup(p1.probabilities[idx] || '') + '" data-project-path="player1.probabilities.' + idx + '" onchange="PayoffMatrixApp.updateStrategyProb(1, ' + idx + ', this.value);">' +
           '<button type="button" class="btn-modern btn-modern-secondary ' + (isElim ? 'active' : '') + '" style="padding: 0.3rem 0.45rem; font-size: 0.72rem;" onclick="PayoffMatrixApp.toggleElimination(\'row\', ' + idx + ');" title="Toggle Dominated (IESDS)">' + (isElim ? 'Restore' : 'Dominate') + '</button>' +
         '</div>';
-      }).join('');
+      }).join(''));
     }
 
     var p2StratContainer = document.getElementById("p2-strategies-container");
     if (p2StratContainer) {
-      p2StratContainer.innerHTML = p2.strategies.map(function(s, idx) {
+      updateControls(p2StratContainer, p2.strategies.map(function(s, idx) {
         var isElim = matrixState.eliminatedCols.indexOf(idx) !== -1;
         return '<div style="display: flex; gap: 0.35rem; align-items: center; margin-bottom: 0.35rem;">' +
           '<span style="font-size: 0.75rem; font-weight: 700; color: #0284c7; width: 22px;">C' + (idx + 1) + '</span>' +
@@ -1192,7 +1197,7 @@
           '<input type="text" maxlength="10000" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + escapeMarkup(p2.probabilities[idx] || '') + '" data-project-path="player2.probabilities.' + idx + '" onchange="PayoffMatrixApp.updateStrategyProb(2, ' + idx + ', this.value);">' +
           '<button type="button" class="btn-modern btn-modern-secondary ' + (isElim ? 'active' : '') + '" style="padding: 0.3rem 0.45rem; font-size: 0.72rem;" onclick="PayoffMatrixApp.toggleElimination(\'col\', ' + idx + ');" title="Toggle Dominated (IESDS)">' + (isElim ? 'Restore' : 'Dominate') + '</button>' +
         '</div>';
-      }).join('');
+      }).join(''));
     }
 
     // Render Matrix Grid Editor Table
@@ -1227,7 +1232,7 @@
         html += '</tr>';
       }
       html += '</tbody></table>';
-      editorGrid.innerHTML = html;
+      updateControls(editorGrid, html);
     }
 
     renderEquilibriumInsight();
