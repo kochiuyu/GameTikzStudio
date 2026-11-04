@@ -1,5 +1,27 @@
 # Maintenance validation
 
+## Reliability update (2026-11-04)
+
+Validated the local `fix/studio-reliability` changes from main `25d6d5e` using Node 24.22.1.
+
+- `npm run check`: 93 regression tests pass, plus syntax checks for source and inline scripts.
+- `npm run build`: static packaging passes and includes the new shared project module.
+- Strict numeric payoff parsing, unresolved best-response comparisons, manual annotation distinctions, SVG markup/escaping/MIME, phase reorder/delete/split/rejoin and unique IDs are covered.
+- Matrix/timing autosave and fresh-context restore, unblurred draft input events, JSON round trips, wrong/malformed files, corrupt storage, storage failures, undo/redo, history limits, UTF-8 size limits, file-selection races, download payloads and synchronized controls are covered with DOM stubs.
+- All existing matrix and timing presets were round-tripped through project validation. Startup listener simulation confirmed saved manual annotations are not overwritten by initial numeric calculations.
+- Actual LaTeX compilation passed for matrix, timing, market-entry and signaling-tree samples using TeX Live after temporary local format/font-map setup. Additional symbolic matrix and split-phase timing fixtures compiled successfully.
+- Generated matrix SVG parsed as XML and was rasterized with Inkscape for visual inspection. The split-phase timing PDF was rendered and inspected; long phase names wrap within their own braces.
+
+### Interactive browser follow-up
+
+A supported static preview enabled real Chromium interaction tests after the initial direct-launch restriction. Matrix/timing unblurred text survived refresh; project download/load, repeated same-file loading, invalid-file rejection, option undo/redo, and timing add/reorder/delete phase associations passed. A downloaded matrix SVG contained actual XML/SVG data.
+
+Interactive testing found that editing text then immediately clicking an adjacent NE/move/delete button lost the first click because the blur handler replaced the target element. Controls now reconcile their markup in place. Browser retests confirmed the first click works in both studios, keyboard focus stays on the target, and undo restores deleted stages with newly typed text. Three additional regressions cover node identity, focused values and structural control updates.
+
+These are representative Chromium checks, not exhaustive browser coverage. Run the README manual checklist for future changes. LaTeX compile success does not guarantee layout for arbitrary user content. Long player labels can still crowd in the existing timing layout.
+
+## Earlier maintenance validation
+
 Validated locally on Windows with Node 24.18.1, the in-app Chromium browser and MiKTeX pdfTeX 1.40.25. The pull-request workflow independently runs Node 22 syntax checks, regression tests and static packaging.
 
 ## Browser checks

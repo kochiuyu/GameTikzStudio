@@ -17,6 +17,7 @@
   <script type="text/javascript" src="js/modern-ui.js"></script>
   <script type="text/javascript" src="js/export-png.js"></script>
   <script type="text/javascript" src="js/payoff-matrix.js"></script>
+  <script type="text/javascript" src="js/studio-project.js"></script>
 
   <style>
     .matrix-size-btn.active {
@@ -220,6 +221,15 @@
       </div>
     </div>
 
+    <div role="group" aria-label="Project and history" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-bottom: 1rem;">
+      <button type="button" class="btn-modern btn-modern-secondary" onclick="studioProject.download();">Save Project</button>
+      <button type="button" class="btn-modern btn-modern-secondary" onclick="document.getElementById('project-file').click();">Load Project</button>
+      <input type="file" id="project-file" accept=".json,application/json" hidden onchange="studioProject.loadFile(this);">
+      <button type="button" id="project-undo" class="btn-modern btn-modern-secondary" disabled onclick="studioProject.undo();" title="Undo (Ctrl/Cmd+Z outside text fields)">↶ Undo</button>
+      <button type="button" id="project-redo" class="btn-modern btn-modern-secondary" disabled onclick="studioProject.redo();" title="Redo (Ctrl/Cmd+Shift+Z outside text fields)">↷ Redo</button>
+      <span id="project-status" role="status" style="font-size: 0.75rem; color: var(--color-text-muted);">Autosave is local to this browser.</span>
+    </div>
+
     <!-- Workspace Layout: Left Editor, Center Canvas Preview, Right TikZ Code -->
     <div class="studio-workspace-3col" id="studio-workspace">
       
@@ -253,7 +263,7 @@
 
           <div style="margin-bottom: 0.75rem;">
             <label style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Game Title:</label>
-            <input type="text" id="matrix-title-input" class="input-modern" style="width: 100%; font-size: 0.825rem;" oninput="PayoffMatrixApp.updateTitle(this.value);" />
+            <input type="text" maxlength="10000" id="matrix-title-input" class="input-modern" style="width: 100%; font-size: 0.825rem;" oninput="PayoffMatrixApp.updateTitle(this.value);" />
             <span class="beginner-hint-text">Descriptive title (e.g. Prisoner's Dilemma). Plain text accepted!</span>
           </div>
 
@@ -261,10 +271,10 @@
           <div style="margin-bottom: 0.75rem;">
             <label style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); display: block; margin-bottom: 0.35rem;">Matrix Dimensions:</label>
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem;">
-              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(2, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 2</button>
-              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(2, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 3</button>
-              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(3, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 2</button>
-              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" onclick="onSetDimensions(3, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 3</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" data-matrix-rows="2" data-matrix-cols="2" onclick="onSetDimensions(2, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 2</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" data-matrix-rows="2" data-matrix-cols="3" onclick="onSetDimensions(2, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">2 × 3</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" data-matrix-rows="3" data-matrix-cols="2" onclick="onSetDimensions(3, 2, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 2</button>
+              <button type="button" class="btn-modern btn-modern-secondary matrix-size-btn" data-matrix-rows="3" data-matrix-cols="3" onclick="onSetDimensions(3, 3, this);" style="font-size: 0.75rem; padding: 0.3rem;">3 × 3</button>
             </div>
             <span class="beginner-hint-text">Number of choices available to Player 1 (Rows) &times; Player 2 (Columns).</span>
           </div>
@@ -297,7 +307,7 @@
             Player 1 (Row Player)
           </h2>
           <div style="margin-bottom: 0.5rem;">
-            <input type="text" id="p1-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #4f46e5;" placeholder="Player 1 Name" oninput="PayoffMatrixApp.updatePlayerName(1, this.value);">
+            <input type="text" maxlength="10000" id="p1-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #4f46e5;" placeholder="Player 1 Name" oninput="PayoffMatrixApp.updatePlayerName(1, this.value);">
             <span class="beginner-hint-text">Chooses the row. Player 1's payoffs appear <strong>first</strong> in each cell $(u_1, \cdot)$.</span>
           </div>
           <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
@@ -313,7 +323,7 @@
             Player 2 (Column Player)
           </h2>
           <div style="margin-bottom: 0.5rem;">
-            <input type="text" id="p2-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #0284c7;" placeholder="Player 2 Name" oninput="PayoffMatrixApp.updatePlayerName(2, this.value);">
+            <input type="text" maxlength="10000" id="p2-name-input" class="input-modern" style="width: 100%; font-size: 0.825rem; font-weight: 600; color: #0284c7;" placeholder="Player 2 Name" oninput="PayoffMatrixApp.updatePlayerName(2, this.value);">
             <span class="beginner-hint-text">Chooses the column. Player 2's payoffs appear <strong>second</strong> in each cell $(\cdot, u_2)$.</span>
           </div>
           <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
@@ -612,12 +622,20 @@
     }
 
     function exportMatrixImage(format) {
-      var canvas = document.getElementById('matrix-canvas');
-      if (!canvas) return;
+      if (format !== 'png' && format !== 'svg') return;
       var link = document.createElement('a');
       link.download = (PayoffMatrixApp.getState().title || "matrix").toLowerCase().replace(/[^a-z0-9]+/g, "-") + '.' + format;
-      link.href = canvas.toDataURL('image/png');
+      var objectURL;
+      if (format === 'svg') {
+        objectURL = URL.createObjectURL(new Blob([PayoffMatrixApp.generateSVG()], { type: 'image/svg+xml;charset=utf-8' }));
+        link.href = objectURL;
+      } else {
+        var canvas = document.getElementById('matrix-canvas');
+        if (!canvas) return;
+        link.href = canvas.toDataURL('image/png');
+      }
       link.click();
+      if (objectURL) setTimeout(function() { URL.revokeObjectURL(objectURL); }, 1000);
       showToast('Exported diagram as ' + format.toUpperCase());
     }
 
