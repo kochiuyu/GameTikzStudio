@@ -17,6 +17,7 @@
   <script type="text/javascript" src="js/modern-ui.js"></script>
   <script type="text/javascript" src="js/export-png.js"></script>
   <script type="text/javascript" src="js/game-timing.js"></script>
+  <script type="text/javascript" src="js/studio-project.js"></script>
   <style>
     .code-area-modern,
     textarea.code-area-modern,
@@ -182,6 +183,15 @@
       </div>
     </div>
 
+    <div role="group" aria-label="Project and history" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; margin-bottom: 1rem;">
+      <button type="button" class="btn-modern btn-modern-secondary" onclick="studioProject.download();">Save Project</button>
+      <button type="button" class="btn-modern btn-modern-secondary" onclick="document.getElementById('project-file').click();">Load Project</button>
+      <input type="file" id="project-file" accept=".json,application/json" hidden onchange="studioProject.loadFile(this);">
+      <button type="button" id="project-undo" class="btn-modern btn-modern-secondary" disabled onclick="studioProject.undo();" title="Undo (Ctrl/Cmd+Z outside text fields)">↶ Undo</button>
+      <button type="button" id="project-redo" class="btn-modern btn-modern-secondary" disabled onclick="studioProject.redo();" title="Redo (Ctrl/Cmd+Shift+Z outside text fields)">↷ Redo</button>
+      <span id="project-status" role="status" style="font-size: 0.75rem; color: var(--color-text-muted);">Autosave is local to this browser.</span>
+    </div>
+
     <!-- Workspace Grid -->
     <div class="studio-workspace-3col" id="studio-workspace">
       
@@ -219,15 +229,15 @@
           <div style="display: flex; flex-direction: column; gap: 0.45rem; padding-bottom: 0.75rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--color-border);">
             <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; cursor: pointer;">
               <span>Show Phase Brackets</span>
-              <input type="checkbox" checked onchange="GameTimingApp.setOption('showPhases', this.checked);">
+              <input type="checkbox" id="project-option-showPhases" checked onchange="GameTimingApp.setOption('showPhases', this.checked);">
             </label>
             <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; cursor: pointer;">
               <span>Show Information Sets / Beliefs</span>
-              <input type="checkbox" checked onchange="GameTimingApp.setOption('showInformation', this.checked);">
+              <input type="checkbox" id="project-option-showInformation" checked onchange="GameTimingApp.setOption('showInformation', this.checked);">
             </label>
             <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; cursor: pointer;">
               <span>Show Realized Payoffs</span>
-              <input type="checkbox" checked onchange="GameTimingApp.setOption('showPayoffs', this.checked);">
+              <input type="checkbox" id="project-option-showPayoffs" checked onchange="GameTimingApp.setOption('showPayoffs', this.checked);">
             </label>
           </div>
 

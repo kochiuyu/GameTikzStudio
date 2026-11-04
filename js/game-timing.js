@@ -811,6 +811,56 @@
     return JSON.parse(JSON.stringify(obj));
   }
 
+  // Phase membership belongs to stages, not their current positions. Legacy
+  // presets/projects use inclusive index ranges; migrate those before any edit.
+  function normalizePhases() {
+    var stages = timingState.stages;
+    timingState.phases = timingState.phases.filter(function(ph) {
+      var ids = Array.isArray(ph.stageIds) ? ph.stageIds : stages
+        .filter(function(stage, idx) { return idx >= ph.from && idx <= ph.to; })
+        .map(function(stage) { return stage.id; });
+      var indices = [];
+      ph.stageIds = stages.filter(function(stage, idx) {
+        if (ids.indexOf(stage.id) === -1) return false;
+        indices.push(idx);
+        return true;
+      }).map(function(stage) { return stage.id; });
+      if (!indices.length) return false;
+      // Bounds retained for legacy readers only. Renderers must use runs below.
+      ph.from = indices[0];
+      ph.to = indices[indices.length - 1];
+      return true;
+    });
+  }
+
+  function getPhaseRanges() {
+    normalizePhases();
+    var ranges = [];
+    timingState.phases.forEach(function(ph) {
+      var run = null;
+      timingState.stages.forEach(function(stage, idx) {
+        if (ph.stageIds.indexOf(stage.id) === -1) {
+          run = null;
+        } else if (run) {
+          run.to = idx;
+        } else {
+          run = { name: ph.name, from: idx, to: idx };
+          ranges.push(run);
+        }
+      });
+    });
+    return ranges;
+  }
+
+  var nextStageId = 0;
+  function createStageId() {
+    var id;
+    do {
+      id = "stage-added-" + nextStageId++;
+    } while (timingState.stages.some(function(stage) { return stage.id === id; }));
+    return id;
+  }
+
   function loadPreset(presetId) {
     var p = TIMING_PRESETS[presetId];
     if (!p) return;
@@ -823,7 +873,7 @@
   // Generate TikZ Code for Dynamic Game Timing
   function generateTikZCode(isStandalone) {
     var stages = timingState.stages;
-    var phases = timingState.phases;
+    var phases = getPhaseRanges();
     var opts = timingState.options;
     var n = stages.length;
 
@@ -919,13 +969,15 @@
 
       out.push("  % Stage Grouping Brackets (Phases)");
       phases.forEach(function(ph, idx) {
-        var fromX = (ph.from * dxNum - 1.5).toFixed(1);
-        var toX = (ph.to * dxNum + 1.5).toFixed(1);
+        var phasePad = Math.min(1.5, dxNum * 0.45);
+        var fromX = (ph.from * dxNum - phasePad).toFixed(2);
+        var toX = (ph.to * dxNum + phasePad).toFixed(2);
+        var labelWidth = ((ph.to - ph.from) * dxNum + 2 * phasePad - 0.15).toFixed(2);
         out.push("  \\draw[decorate, decoration={brace, amplitude=5pt}, thick, gray!70]");
         out.push("    (" + fromX + ", " + braceY + ") -- (" + toX + ", " + braceY + ")");
         // Phase titles are text; preserve explicitly escaped ampersands.
         var phaseName = ph.name.replace(/(^|[^\\])&/g, '$1\\&');
-        out.push("    node[midway, above=7pt, font=\\small\\bfseries, text=gray!90] {" + phaseName + "};");
+        out.push("    node[midway, above=7pt, text width=" + labelWidth + "cm, align=center, inner xsep=0pt, font=\\small\\bfseries, text=gray!90] {" + phaseName + "};");
       });
       out.push("");
     }
@@ -981,10 +1033,24 @@
   }
 
   // Accurately wrap text based on canvas text measurements
-  function getWrappedLines(ctx, text, maxWidth) {
+  function getWrappedLines(ctx, text, maxWidth, breakLongWords) {
     if (!text) return [];
     var clean = formatMathForCanvas(text);
     var words = clean.split(' ');
+    if (breakLongWords) {
+      words = words.reduce(function(parts, word) {
+        var part = '';
+        Array.from(word).forEach(function(ch) {
+          if (part && ctx.measureText(part + ch).width > maxWidth) {
+            parts.push(part);
+            part = '';
+          }
+          part += ch;
+        });
+        if (part) parts.push(part);
+        return parts;
+      }, []);
+    }
     var lines = [];
     var currentLine = '';
 
@@ -1014,28 +1080,16 @@
     if (!ctx) return;
 
     var stages = timingState.stages;
-    var phases = timingState.phases;
+    var phases = getPhaseRanges();
     var opts = timingState.options;
     var n = stages.length;
 
     var dpr = window.devicePixelRatio || 1;
     var rect = canvas.getBoundingClientRect();
     var width = Math.max(rect.width || 820, 820);
-    var height = Math.max(rect.height || 480, 480);
-
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
-
-    // Canvas background
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(10, 10, width - 20, height - 20);
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(10, 10, width - 20, height - 20);
+    // Start from a stable base; the previous intrinsic canvas height may include
+    // expanded phase labels and must not cause growth on repeated renders.
+    var height = 480;
 
     if (n === 0) return;
 
@@ -1080,19 +1134,47 @@
       }
     });
 
-    // Bracket line sits 22px above the highest action text (with minimum 36px from canvas top)
-    var bracketY = Math.max(36, minActionTop - 22);
+    // Wrap each phase within its actual contiguous run, with a gutter between
+    // adjacent runs. Reserve space above the actions for every label line.
+    var phaseLineHeight = 14;
+    var maxPhaseLines = 0;
+    ctx.font = "bold 11.5px -apple-system, BlinkMacSystemFont, sans-serif";
+    var phaseData = opts.showPhases ? phases.map(function(ph) {
+      var spanPad = Math.min(colWidth * (ph.from === ph.to ? 0.48 : 0.42), stepX * 0.45);
+      var startX = stageData[ph.from].x - spanPad;
+      var endX = stageData[ph.to].x + spanPad;
+      var lines = getWrappedLines(ctx, ph.name, Math.max(1, endX - startX - 10), true);
+      maxPhaseLines = Math.max(maxPhaseLines, lines.length);
+      return { startX: startX, endX: endX, lines: lines };
+    }) : [];
+    var bracketY = minActionTop - 22;
+    var requiredBracketY = 28 + maxPhaseLines * phaseLineHeight;
+    var extraTop = phaseData.length ? Math.max(0, requiredBracketY - bracketY) : 0;
+    axisY += extraTop;
+    badgeY += extraTop;
+    bracketY += extraTop;
+    height += extraTop;
+    stageData.forEach(function(sd) { sd.actionStartY += extraTop; });
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Canvas background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(10, 10, width - 20, height - 20);
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(10, 10, width - 20, height - 20);
 
     // Render Phases Brackets (if enabled)
-    if (opts.showPhases && phases.length > 0) {
-      phases.forEach(function(ph) {
-        var startStage = stageData[ph.from];
-        var endStage = stageData[ph.to];
-        if (!startStage || !endStage) return;
-
-        var spanPad = (ph.from === ph.to) ? (colWidth * 0.48) : (colWidth * 0.42);
-        var startX = startStage.x - spanPad;
-        var endX = endStage.x + spanPad;
+    if (phaseData.length > 0) {
+      phaseData.forEach(function(ph) {
+        var startX = ph.startX;
+        var endX = ph.endX;
 
         // Draw bracket
         ctx.strokeStyle = "#94a3b8";
@@ -1116,7 +1198,9 @@
         ctx.font = "bold 11.5px -apple-system, BlinkMacSystemFont, sans-serif";
         ctx.fillStyle = "#334155";
         ctx.textAlign = "center";
-        ctx.fillText(ph.name, midX, bracketY - 11);
+        ph.lines.forEach(function(line, idx) {
+          ctx.fillText(line, midX, bracketY - 11 - (ph.lines.length - 1 - idx) * phaseLineHeight);
+        });
       });
     }
 
@@ -1245,7 +1329,7 @@
   }
 
   function updateCodeViews() {
-    var fn = window.formatTikZSyntax || function(s) { return s; };
+    var fn = window.formatTikZSyntax || escapeHTML;
     var tikzElem = document.getElementById("timing-tikz-code");
     if (tikzElem) {
       var code = generateTikZCode(false);
@@ -1266,6 +1350,12 @@
     }
   }
 
+  function escapeHTML(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
   function renderStageList() {
     var container = document.getElementById("stages-editor-list");
     if (!container) return;
@@ -1275,8 +1365,8 @@
         '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">' +
           '<div style="display: flex; align-items: center; gap: 0.4rem;">' +
             '<span style="font-size: 0.75rem; font-weight: 700; background: #e0e7ff; color: #3730a3; padding: 2px 7px; border-radius: 4px;">#' + (idx + 1) + '</span>' +
-            '<input type="text" class="input-modern" style="width: 70px; padding: 0.2rem 0.4rem; font-size: 0.8rem; font-weight: 700;" value="' + s.timeLabel + '" onchange="GameTimingApp.updateStageProp(' + idx + ', \'timeLabel\', this.value);">' +
-            '<input type="text" class="input-modern" style="width: 130px; padding: 0.2rem 0.4rem; font-size: 0.8rem; font-weight: 600; color: ' + s.playerColor + ';" value="' + s.player + '" onchange="GameTimingApp.updateStageProp(' + idx + ', \'player\', this.value);">' +
+            '<input type="text" maxlength="10000" class="input-modern" style="width: 70px; padding: 0.2rem 0.4rem; font-size: 0.8rem; font-weight: 700;" value="' + escapeHTML(s.timeLabel) + '" data-project-path="stages.' + idx + '.timeLabel" onchange="GameTimingApp.updateStageProp(' + idx + ', \'timeLabel\', this.value);">' +
+            '<input type="text" maxlength="10000" class="input-modern" style="width: 130px; padding: 0.2rem 0.4rem; font-size: 0.8rem; font-weight: 600; color: ' + escapeHTML(s.playerColor) + ';" value="' + escapeHTML(s.player) + '" data-project-path="stages.' + idx + '.player" onchange="GameTimingApp.updateStageProp(' + idx + ', \'player\', this.value);">' +
           '</div>' +
           '<div style="display: flex; gap: 0.25rem;">' +
             '<button type="button" class="btn-modern btn-modern-secondary" onclick="GameTimingApp.moveStage(' + idx + ', -1);" ' + (idx === 0 ? 'disabled' : '') + ' style="padding: 0.2rem 0.4rem; font-size: 0.7rem;">▲</button>' +
@@ -1286,21 +1376,22 @@
         '</div>' +
         '<div style="margin-bottom: 0.4rem;">' +
           '<label style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">Action / Decision Taken:</label>' +
-          '<textarea class="input-modern" style="width: 100%; height: 48px; font-size: 0.78rem; padding: 0.3rem 0.5rem; resize: vertical;" onchange="GameTimingApp.updateStageProp(' + idx + ', \'action\', this.value);">' + s.action + '</textarea>' +
+          '<textarea maxlength="10000" class="input-modern" style="width: 100%; height: 48px; font-size: 0.78rem; padding: 0.3rem 0.5rem; resize: vertical;" data-project-path="stages.' + idx + '.action" onchange="GameTimingApp.updateStageProp(' + idx + ', \'action\', this.value);">' + escapeHTML(s.action) + '</textarea>' +
         '</div>' +
         '<div style="margin-bottom: 0.4rem;">' +
           '<label style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">Information State / Beliefs:</label>' +
-          '<input type="text" class="input-modern" style="width: 100%; font-size: 0.78rem; padding: 0.3rem 0.5rem;" value="' + (s.information || '') + '" onchange="GameTimingApp.updateStageProp(' + idx + ', \'information\', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="width: 100%; font-size: 0.78rem; padding: 0.3rem 0.5rem;" value="' + escapeHTML(s.information || '') + '" data-project-path="stages.' + idx + '.information" onchange="GameTimingApp.updateStageProp(' + idx + ', \'information\', this.value);">' +
         '</div>' +
         '<div>' +
           '<label style="font-size: 0.72rem; color: var(--color-text-muted); display: block;">Realized Payoff / Outcome (Optional):</label>' +
-          '<input type="text" class="input-modern" style="width: 100%; font-size: 0.78rem; padding: 0.3rem 0.5rem;" value="' + (s.payoff || '') + '" placeholder="e.g. u_W = w - e/θ" onchange="GameTimingApp.updateStageProp(' + idx + ', \'payoff\', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="width: 100%; font-size: 0.78rem; padding: 0.3rem 0.5rem;" value="' + escapeHTML(s.payoff || '') + '" placeholder="e.g. u_W = w - e/θ" data-project-path="stages.' + idx + '.payoff" onchange="GameTimingApp.updateStageProp(' + idx + ', \'payoff\', this.value);">' +
         '</div>' +
       '</div>';
     }).join('');
   }
 
   function renderAll() {
+    normalizePhases();
     renderCanvas();
     renderStageList();
     updateCodeViews();
@@ -1309,6 +1400,8 @@
   var GameTimingApp = {
     generateTikZCode: generateTikZCode,
     getState: function() { return timingState; },
+    normalizePhases: normalizePhases,
+    getPhaseRanges: getPhaseRanges,
     loadPreset: loadPreset,
     getPresets: function() { return TIMING_PRESETS; },
     updateStageProp: function(idx, prop, val) {
@@ -1318,9 +1411,10 @@
       }
     },
     addStage: function() {
+      normalizePhases();
       var nextNum = timingState.stages.length;
       timingState.stages.push({
-        id: "s" + Date.now(),
+        id: createStageId(),
         timeLabel: "t = " + nextNum,
         player: "Player " + ((nextNum % 2) + 1),
         playerColor: nextNum % 2 === 0 ? "#4f46e5" : "#0284c7",
@@ -1332,20 +1426,25 @@
       renderAll();
     },
     moveStage: function(idx, dir) {
+      if (!Number.isInteger(idx) || idx < 0 || idx >= timingState.stages.length ||
+          (dir !== -1 && dir !== 1)) return;
       var target = idx + dir;
       if (target < 0 || target >= timingState.stages.length) return;
+      normalizePhases();
       var temp = timingState.stages[idx];
       timingState.stages[idx] = timingState.stages[target];
       timingState.stages[target] = temp;
       renderAll();
     },
     deleteStage: function(idx) {
+      if (!Number.isInteger(idx) || idx < 0 || idx >= timingState.stages.length) return;
       if (timingState.stages.length <= 1) {
         if (window.showToast) {
           window.showToast("Must have at least one stage in the game timing diagram.");
         }
         return;
       }
+      normalizePhases();
       timingState.stages.splice(idx, 1);
       renderAll();
     },
@@ -1356,6 +1455,7 @@
     renderAll: renderAll
   };
 
+  normalizePhases();
   window.GameTimingApp = GameTimingApp;
 
   window.addEventListener('DOMContentLoaded', function() {

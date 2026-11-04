@@ -399,91 +399,66 @@
     return JSON.parse(JSON.stringify(obj));
   }
 
-  // Parse numeric payoff (for auto best-response calculation)
+  // Accept complete finite numeric literals only, never numeric prefixes of expressions.
   function parsePayoff(val) {
-    if (typeof val === 'number') return val;
-    if (!val) return NaN;
-    var trimmed = String(val).trim();
-    // Support fractions like "1/2" or "-1/2"
-    if (/^-?\d+\s*\/\s*\d+$/.test(trimmed)) {
-      var parts = trimmed.split('/');
-      return parseFloat(parts[0]) / parseFloat(parts[1]);
-    }
-    return parseFloat(trimmed);
+    if (typeof val === 'number') return Number.isFinite(val) ? val : NaN;
+    if (typeof val !== 'string') return NaN;
+    var literal = '[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?';
+    var pattern = new RegExp('^(' + literal + ')(?:\\s*/\\s*(' + literal + '))?$');
+    var match = val.trim().match(pattern);
+    if (!match) return NaN;
+    var numerator = Number(match[1]);
+    var denominator = match[2] === undefined ? 1 : Number(match[2]);
+    var result = numerator / denominator;
+    return Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0 && Number.isFinite(result) ? result : NaN;
   }
 
-  // Auto-calculate best responses for Player 1 & Player 2
+  // Analysis is independent of user-controlled annotations. An unknown payoff
+  // invalidates its entire comparison, not just the individual cell.
+  function analyzePayoffs() {
+    var rows = matrixState.player1.strategies.length;
+    var cols = matrixState.player2.strategies.length;
+    var activeRows = Array.from({ length: rows }, function(_, r) { return r; }).filter(function(r) { return matrixState.eliminatedRows.indexOf(r) === -1; });
+    var activeCols = Array.from({ length: cols }, function(_, c) { return c; }).filter(function(c) { return matrixState.eliminatedCols.indexOf(c) === -1; });
+    var p1 = Array.from({ length: rows }, function() { return Array(cols).fill(false); });
+    var p2 = Array.from({ length: rows }, function() { return Array(cols).fill(false); });
+    var complete = activeRows.length > 0 && activeCols.length > 0;
+    activeCols.forEach(function(c) {
+      var values = activeRows.map(function(r) { return parsePayoff(matrixState.cells[r][c].u1); });
+      if (!values.every(Number.isFinite)) { complete = false; return; }
+      var max = Math.max.apply(null, values);
+      activeRows.forEach(function(r, i) { p1[r][c] = values[i] === max; });
+    });
+    activeRows.forEach(function(r) {
+      var values = activeCols.map(function(c) { return parsePayoff(matrixState.cells[r][c].u2); });
+      if (!values.every(Number.isFinite)) { complete = false; return; }
+      var max = Math.max.apply(null, values);
+      activeCols.forEach(function(c, i) { p2[r][c] = values[i] === max; });
+    });
+    var equilibria = [];
+    activeRows.forEach(function(r) {
+      activeCols.forEach(function(c) {
+        if (p1[r][c] && p2[r][c]) equilibria.push({ row: r, col: c });
+      });
+    });
+    return { complete: complete, p1: p1, p2: p2, equilibria: equilibria, hasActiveOutcomes: activeRows.length > 0 && activeCols.length > 0 };
+  }
+
   function computeBestResponses() {
-    var numRows = matrixState.player1.strategies.length;
-    var numCols = matrixState.player2.strategies.length;
+    var analysis = analyzePayoffs();
+    matrixState.cells.forEach(function(row, r) {
+      row.forEach(function(cell, c) {
+        cell.p1Underline = analysis.p1[r][c];
+        cell.p2Underline = analysis.p2[r][c];
+        cell.isNE = cell.p1Underline && cell.p2Underline;
+      });
+    });
+  }
 
-    // First reset underlines if auto-mode
-    for (var r = 0; r < numRows; r++) {
-      for (var c = 0; c < numCols; c++) {
-        matrixState.cells[r][c].p1Underline = false;
-        matrixState.cells[r][c].p2Underline = false;
-      }
-    }
-
-    // Player 1 best response: max in each column c across active rows
-    for (var c = 0; c < numCols; c++) {
-      if (matrixState.eliminatedCols.indexOf(c) !== -1) continue;
-      var maxP1 = -Infinity;
-      var hasValidP1 = false;
-      for (var r = 0; r < numRows; r++) {
-        if (matrixState.eliminatedRows.indexOf(r) !== -1) continue;
-        var p1Val = parsePayoff(matrixState.cells[r][c].u1);
-        if (!isNaN(p1Val)) {
-          hasValidP1 = true;
-          if (p1Val > maxP1) maxP1 = p1Val;
-        }
-      }
-      if (hasValidP1 && maxP1 !== -Infinity) {
-        for (var r2 = 0; r2 < numRows; r2++) {
-          if (matrixState.eliminatedRows.indexOf(r2) !== -1) continue;
-          var val = parsePayoff(matrixState.cells[r2][c].u1);
-          if (val === maxP1) {
-            matrixState.cells[r2][c].p1Underline = true;
-          }
-        }
-      }
-    }
-
-    // Player 2 best response: max in each row r across active columns
-    for (var r = 0; r < numRows; r++) {
-      if (matrixState.eliminatedRows.indexOf(r) !== -1) continue;
-      var maxP2 = -Infinity;
-      var hasValidP2 = false;
-      for (var c = 0; c < numCols; c++) {
-        if (matrixState.eliminatedCols.indexOf(c) !== -1) continue;
-        var p2Val = parsePayoff(matrixState.cells[r][c].u2);
-        if (!isNaN(p2Val)) {
-          hasValidP2 = true;
-          if (p2Val > maxP2) maxP2 = p2Val;
-        }
-      }
-      if (hasValidP2 && maxP2 !== -Infinity) {
-        for (var c2 = 0; c2 < numCols; c2++) {
-          if (matrixState.eliminatedCols.indexOf(c2) !== -1) continue;
-          var val = parsePayoff(matrixState.cells[r][c2].u2);
-          if (val === maxP2) {
-            matrixState.cells[r][c2].p2Underline = true;
-          }
-        }
-      }
-    }
-
-    // Check Nash Equilibria: cell where both are best responses
-    for (var r = 0; r < numRows; r++) {
-      for (var c = 0; c < numCols; c++) {
-        var isElim = matrixState.eliminatedRows.indexOf(r) !== -1 || matrixState.eliminatedCols.indexOf(c) !== -1;
-        if (!isElim && matrixState.cells[r][c].p1Underline && matrixState.cells[r][c].p2Underline) {
-          matrixState.cells[r][c].isNE = true;
-        } else {
-          matrixState.cells[r][c].isNE = false;
-        }
-      }
-    }
+  function escapeMarkup(value) {
+    return String(value).replace(/[&<>"']/g, function(ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch];
+    }).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
   }
 
   // Load a preset
@@ -798,6 +773,75 @@
     return lines.join("\n");
   }
 
+  // Standalone vector export. Text stays editable; no raster canvas is embedded.
+  function generateSVG() {
+    var p1 = matrixState.player1;
+    var p2 = matrixState.player2;
+    var opts = matrixState.options;
+    var rows = p1.strategies.length;
+    var cols = p2.strategies.length;
+    // Generous width estimates keep long labels and symbolic payoffs in their cells.
+    function textWidth(value) { return Array.from(String(value)).length * 9; }
+    var headerW = Math.max(180, textWidth(p1.name) + textWidth(p2.name) + 32);
+    p1.strategies.concat(opts.showProbabilities ? p1.probabilities : []).forEach(function(value) { headerW = Math.max(headerW, textWidth(value) + 32); });
+    var cellW = 140;
+    p2.strategies.concat(opts.showProbabilities ? p2.probabilities : []).forEach(function(value) { cellW = Math.max(cellW, textWidth(value) + 32); });
+    matrixState.cells.forEach(function(row) { row.forEach(function(cell) { cellW = Math.max(cellW, textWidth(cell.u1) + textWidth(cell.u2) + 64); }); });
+    var x0 = 75, y0 = 110, headerH = 60, cellH = 76;
+    var gridW = headerW + cols * cellW, gridH = headerH + rows * cellH;
+    var width = Math.max(760, gridW + 150, textWidth(matrixState.title) + 80, textWidth(p2.name) + 160);
+    var height = y0 + gridH + 100;
+    var out = ['<?xml version="1.0" encoding="UTF-8"?>', '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" role="img">', '<title>' + escapeMarkup(matrixState.title || 'Payoff matrix') + '</title>', '<rect width="100%" height="100%" fill="white"/>'];
+    function rect(x, y, w, h, fill, stroke, lineWidth) {
+      out.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="' + (lineWidth || 1) + '"/>');
+    }
+    function text(value, x, y, color, size, extra) {
+      out.push('<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="' + (size || 14) + '" fill="' + color + '"' + (extra || '') + '>' + escapeMarkup(value) + '</text>');
+    }
+    function line(x1, y1, x2, y2, color, dashed) {
+      out.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + color + '" stroke-width="2"' + (dashed ? ' stroke-dasharray="8 6"' : '') + '/>');
+    }
+    text(matrixState.title, width / 2, 30, '#0f172a', 20, ' font-weight="bold"');
+    text(p2.name + ' (Column Player)', x0 + headerW + cols * cellW / 2, 78, '#0284c7', 15);
+    var labelY = y0 + headerH + rows * cellH / 2;
+    text(p1.name + ' (Row Player)', 30, labelY, '#4f46e5', 15, ' transform="rotate(-90 30 ' + labelY + ')"');
+    rect(x0, y0, headerW, headerH, '#f1f5f9', '#cbd5e1');
+    if (opts.showDiagonalHeader) {
+      line(x0, y0, x0 + headerW, y0 + headerH, '#94a3b8');
+      text(p1.name, x0 + headerW / 3, y0 + 44, '#4f46e5', 12);
+      text(p2.name, x0 + headerW * 2 / 3, y0 + 16, '#0284c7', 12);
+    } else {
+      text(p1.name + ' / ' + p2.name, x0 + headerW / 2, y0 + headerH / 2, '#475569', 12);
+    }
+    p2.strategies.forEach(function(strategy, c) {
+      var x = x0 + headerW + c * cellW;
+      rect(x, y0, cellW, headerH, '#f8fafc', '#cbd5e1');
+      text(strategy, x + cellW / 2, y0 + (opts.showProbabilities ? 22 : 30), '#0f172a');
+      if (opts.showProbabilities && p2.probabilities[c]) text('(' + p2.probabilities[c] + ')', x + cellW / 2, y0 + 43, '#0284c7', 12);
+    });
+    p1.strategies.forEach(function(strategy, r) {
+      var y = y0 + headerH + r * cellH;
+      rect(x0, y, headerW, cellH, '#f8fafc', '#cbd5e1');
+      text(strategy, x0 + headerW / 2, y + (opts.showProbabilities ? 28 : 38), '#0f172a');
+      if (opts.showProbabilities && p1.probabilities[r]) text('(' + p1.probabilities[r] + ')', x0 + headerW / 2, y + 51, '#4f46e5', 12);
+      matrixState.cells[r].forEach(function(cell, c) {
+        var x = x0 + headerW + c * cellW;
+        var eliminated = matrixState.eliminatedRows.indexOf(r) !== -1 || matrixState.eliminatedCols.indexOf(c) !== -1;
+        var highlighted = cell.isNE && !eliminated && opts.autoHighlightNE;
+        rect(x, y, cellW, cellH, eliminated ? '#f1f5f9' : highlighted ? '#ecfdf5' : '#ffffff', highlighted ? '#10b981' : '#cbd5e1', highlighted ? 2.5 : 1);
+        var center = x + cellW / 2;
+        out.push('<text x="' + center + '" y="' + (y + cellH / 2) + '" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="15" font-weight="bold"><tspan fill="' + (eliminated ? '#94a3b8' : '#4f46e5') + '"' + (cell.p1Underline && !eliminated ? ' text-decoration="underline"' : '') + '>' + escapeMarkup(cell.u1) + '</tspan><tspan fill="#64748b">, </tspan><tspan fill="' + (eliminated ? '#94a3b8' : '#0284c7') + '"' + (cell.p2Underline && !eliminated ? ' text-decoration="underline"' : '') + '>' + escapeMarkup(cell.u2) + '</tspan></text>');
+        if (cell.isNE && !eliminated && opts.neBadge) text('NE★', x + cellW - 23, y + 14, '#059669', 10);
+      });
+    });
+    matrixState.eliminatedRows.forEach(function(r) { var y = y0 + headerH + (r + 0.5) * cellH; line(x0 - 10, y, x0 + gridW + 10, y, '#ef4444', true); });
+    matrixState.eliminatedCols.forEach(function(c) { var x = x0 + headerW + (c + 0.5) * cellW; line(x, y0 - 10, x, y0 + gridH + 10, '#ef4444', true); });
+    text('Payoffs: (Player 1, Player 2) • Underlines: best-response markers • Green: NE markers', width / 2, height - 45, '#475569', 12);
+    text('Manual markers are annotations; numeric analysis is shown in the studio.', width / 2, height - 24, '#475569', 11);
+    out.push('</svg>');
+    return out.join('\n');
+  }
+
   // HTML5 Canvas Rendering
   function renderCanvas() {
     var canvas = document.getElementById("matrix-canvas");
@@ -1074,7 +1118,7 @@
 
   // Update Code Views
   function updateCodeViews() {
-    var fn = window.formatTikZSyntax || function(s) { return s; };
+    var fn = window.formatTikZSyntax || escapeMarkup;
     var tikzElem = document.getElementById("tikz-code-area");
     if (tikzElem) {
       var code = generateTikZCode(false);
@@ -1131,8 +1175,8 @@
         var isElim = matrixState.eliminatedRows.indexOf(idx) !== -1;
         return '<div style="display: flex; gap: 0.35rem; align-items: center; margin-bottom: 0.35rem;">' +
           '<span style="font-size: 0.75rem; font-weight: 700; color: #4f46e5; width: 22px;">R' + (idx + 1) + '</span>' +
-          '<input type="text" class="input-modern" style="flex: 1; padding: 0.3rem 0.5rem; font-size: 0.8rem;" value="' + s.replace(/"/g, '&quot;') + '" onchange="PayoffMatrixApp.updateStrategyName(1, ' + idx + ', this.value);">' +
-          '<input type="text" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + (p1.probabilities[idx] || '') + '" onchange="PayoffMatrixApp.updateStrategyProb(1, ' + idx + ', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="flex: 1; padding: 0.3rem 0.5rem; font-size: 0.8rem;" value="' + escapeMarkup(s) + '" data-project-path="player1.strategies.' + idx + '" onchange="PayoffMatrixApp.updateStrategyName(1, ' + idx + ', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + escapeMarkup(p1.probabilities[idx] || '') + '" data-project-path="player1.probabilities.' + idx + '" onchange="PayoffMatrixApp.updateStrategyProb(1, ' + idx + ', this.value);">' +
           '<button type="button" class="btn-modern btn-modern-secondary ' + (isElim ? 'active' : '') + '" style="padding: 0.3rem 0.45rem; font-size: 0.72rem;" onclick="PayoffMatrixApp.toggleElimination(\'row\', ' + idx + ');" title="Toggle Dominated (IESDS)">' + (isElim ? 'Restore' : 'Dominate') + '</button>' +
         '</div>';
       }).join('');
@@ -1144,8 +1188,8 @@
         var isElim = matrixState.eliminatedCols.indexOf(idx) !== -1;
         return '<div style="display: flex; gap: 0.35rem; align-items: center; margin-bottom: 0.35rem;">' +
           '<span style="font-size: 0.75rem; font-weight: 700; color: #0284c7; width: 22px;">C' + (idx + 1) + '</span>' +
-          '<input type="text" class="input-modern" style="flex: 1; padding: 0.3rem 0.5rem; font-size: 0.8rem;" value="' + s.replace(/"/g, '&quot;') + '" onchange="PayoffMatrixApp.updateStrategyName(2, ' + idx + ', this.value);">' +
-          '<input type="text" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + (p2.probabilities[idx] || '') + '" onchange="PayoffMatrixApp.updateStrategyProb(2, ' + idx + ', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="flex: 1; padding: 0.3rem 0.5rem; font-size: 0.8rem;" value="' + escapeMarkup(s) + '" data-project-path="player2.strategies.' + idx + '" onchange="PayoffMatrixApp.updateStrategyName(2, ' + idx + ', this.value);">' +
+          '<input type="text" maxlength="10000" class="input-modern" style="width: 50px; padding: 0.3rem 0.3rem; font-size: 0.75rem; text-align: center;" title="Mixed Strategy Prob" value="' + escapeMarkup(p2.probabilities[idx] || '') + '" data-project-path="player2.probabilities.' + idx + '" onchange="PayoffMatrixApp.updateStrategyProb(2, ' + idx + ', this.value);">' +
           '<button type="button" class="btn-modern btn-modern-secondary ' + (isElim ? 'active' : '') + '" style="padding: 0.3rem 0.45rem; font-size: 0.72rem;" onclick="PayoffMatrixApp.toggleElimination(\'col\', ' + idx + ');" title="Toggle Dominated (IESDS)">' + (isElim ? 'Restore' : 'Dominate') + '</button>' +
         '</div>';
       }).join('');
@@ -1158,20 +1202,20 @@
       // Header row
       html += '<thead><tr><th></th>';
       for (var c = 0; c < numCols; c++) {
-        html += '<th style="font-size: 0.8rem; color: #0284c7; padding: 4px; text-align: center;">' + p2.strategies[c] + '</th>';
+        html += '<th style="font-size: 0.8rem; color: #0284c7; padding: 4px; text-align: center;">' + escapeMarkup(p2.strategies[c]) + '</th>';
       }
       html += '</tr></thead><tbody>';
 
       for (var r = 0; r < numRows; r++) {
-        html += '<tr><td style="font-size: 0.8rem; font-weight: 600; color: #4f46e5; padding: 4px; white-space: nowrap;">' + p1.strategies[r] + '</td>';
+        html += '<tr><td style="font-size: 0.8rem; font-weight: 600; color: #4f46e5; padding: 4px; white-space: nowrap;">' + escapeMarkup(p1.strategies[r]) + '</td>';
         for (var c = 0; c < numCols; c++) {
           var cell = cells[r][c];
           var isNE = cell.isNE;
           html += '<td style="background: ' + (isNE ? '#ecfdf5' : '#ffffff') + '; border: 1.5px solid ' + (isNE ? '#10b981' : '#e2e8f0') + '; border-radius: 6px; padding: 6px; text-align: center;">' +
             '<div style="display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 4px;">' +
-              '<input type="text" value="' + cell.u1 + '" style="width: 42px; text-align: center; font-weight: 700; color: #4f46e5; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 0.85rem;" onchange="PayoffMatrixApp.updatePayoff(' + r + ', ' + c + ', 1, this.value);">' +
+              '<input type="text" maxlength="10000" value="' + escapeMarkup(cell.u1) + '" data-project-path="cells.' + r + '.' + c + '.u1" style="width: 42px; text-align: center; font-weight: 700; color: #4f46e5; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 0.85rem;" onchange="PayoffMatrixApp.updatePayoff(' + r + ', ' + c + ', 1, this.value);">' +
               '<span style="color: #94a3b8; font-weight: bold;">,</span>' +
-              '<input type="text" value="' + cell.u2 + '" style="width: 42px; text-align: center; font-weight: 700; color: #0284c7; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 0.85rem;" onchange="PayoffMatrixApp.updatePayoff(' + r + ', ' + c + ', 2, this.value);">' +
+              '<input type="text" maxlength="10000" value="' + escapeMarkup(cell.u2) + '" data-project-path="cells.' + r + '.' + c + '.u2" style="width: 42px; text-align: center; font-weight: 700; color: #0284c7; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 4px; font-size: 0.85rem;" onchange="PayoffMatrixApp.updatePayoff(' + r + ', ' + c + ', 2, this.value);">' +
             '</div>' +
             '<div style="display: flex; justify-content: center; gap: 4px;">' +
               '<button type="button" class="btn-modern btn-modern-secondary ' + (cell.p1Underline ? 'active' : '') + '" style="padding: 1px 5px; font-size: 0.68rem; ' + (cell.p1Underline ? 'background: #4f46e5; color: white;' : '') + '" onclick="PayoffMatrixApp.toggleUnderline(' + r + ', ' + c + ', 1);" title="Underline P1 payoff"><u>u1</u></button>' +
@@ -1193,70 +1237,33 @@
     var container = document.getElementById("matrix-insight-container");
     if (!container) return;
 
-    var p1 = matrixState.player1;
-    var p2 = matrixState.player2;
-    var cells = matrixState.cells;
-    var numRows = p1.strategies.length;
-    var numCols = p2.strategies.length;
-
-    var neList = [];
-    for (var r = 0; r < numRows; r++) {
-      for (var c = 0; c < numCols; c++) {
-        var cell = cells[r][c];
-        if (cell.isNE || (cell.p1Underline && cell.p2Underline)) {
-          neList.push({
-            row: r,
-            col: c,
-            s1: p1.strategies[r],
-            s2: p2.strategies[c],
-            u1: cell.u1,
-            u2: cell.u2
-          });
-        }
-      }
-    }
-
-    var html = '';
-    if (neList.length === 0) {
-      html = '<div class="insight-card-header">' +
-        '<span class="insight-card-title" style="color: #d97706;">' +
-          '<span>⚖️</span> No Pure Strategy Nash Equilibrium' +
-        '</span>' +
-        '<span class="nav-badge" style="background: #fef3c7; color: #92400e;">Mixed Strategy Game</span>' +
-      '</div>' +
-      '<div class="insight-card-body">' +
-        'In this matrix, neither player has a fixed pure choice that remains immune to being outguessed. ' +
-        'This is characteristic of zero-sum games of pure conflict (e.g. <em>Matching Pennies</em> or <em>Rock-Paper-Scissors</em>). ' +
-        'To play optimally, players will randomize their moves (playing a <strong>Mixed Strategy Nash Equilibrium</strong>).' +
-      '</div>';
-    } else if (neList.length === 1) {
-      var ne = neList[0];
-      html = '<div class="insight-card-header">' +
-        '<span class="insight-card-title" style="color: #059669;">' +
-          '<span>🎯</span> Unique Pure Nash Equilibrium: (' + ne.s1 + ', ' + ne.s2 + ')' +
-        '</span>' +
-        '<span class="nav-badge" style="background: #ecfdf5; color: #065f46;">Payoffs: (' + ne.u1 + ', ' + ne.u2 + ')</span>' +
-      '</div>' +
-      '<div class="insight-card-body">' +
-        'At outcome <strong>(' + ne.s1 + ', ' + ne.s2 + ')</strong>, <strong>' + p1.name + '</strong> receives ' + ne.u1 + ' and <strong>' + p2.name + '</strong> receives ' + ne.u2 + '. ' +
-        'Neither player has an incentive to unilaterally switch to another choice. Both are playing their mutual best responses.' +
-      '</div>';
+    var analysis = analyzePayoffs();
+    var neList = analysis.equilibria;
+    var heading;
+    var body;
+    if (!analysis.hasActiveOutcomes) {
+      heading = 'No active strategy outcomes';
+      body = 'Restore at least one strategy for each player to calculate best responses.';
+    } else if (!analysis.complete) {
+      heading = 'Numeric analysis incomplete';
+      body = 'Symbolic or invalid payoffs prevent some best-response comparisons. ' +
+        (neList.length ? neList.length + ' pure Nash equilibrium outcome(s) verified; other equilibria may exist.' : 'No pure Nash equilibrium has been verified; absence cannot be concluded.');
+    } else if (!neList.length) {
+      heading = 'No Pure Strategy Nash Equilibrium';
+      body = 'Every active outcome admits a strictly profitable unilateral deviation. Mixed equilibria are not calculated by this tool.';
     } else {
-      var neText = neList.map(function(n) {
-        return '<strong>(' + n.s1 + ', ' + n.s2 + ')</strong> with payoffs (' + n.u1 + ', ' + n.u2 + ')';
-      }).join(' and ');
-
-      html = '<div class="insight-card-header">' +
-        '<span class="insight-card-title" style="color: #2563eb;">' +
-          '<span>🤝</span> ' + neList.length + ' Pure Nash Equilibria Found' +
-        '</span>' +
-        '<span class="nav-badge" style="background: #eff6ff; color: #1e40af;">Multiple Equilibria</span>' +
-      '</div>' +
-      '<div class="insight-card-body">' +
-        'Equilibria occur at: ' + neText + '. ' +
-        'Games with multiple equilibria often model coordination or trust dilemmas (such as <em>Battle of the Sexes</em> or <em>Stag Hunt</em>), where players succeed by coordinating on the same outcome.' +
-      '</div>';
+      heading = neList.length === 1 ? 'Unique Pure Nash Equilibrium' : neList.length + ' Pure Nash Equilibria Found';
+      body = 'Neither player can gain by unilaterally changing strategy at the verified outcomes.';
     }
+    var html = '<div class="insight-card-header"><span class="insight-card-title">' + heading + '</span></div>' +
+      '<div class="insight-card-body">' + body;
+    neList.forEach(function(ne) {
+      var cell = matrixState.cells[ne.row][ne.col];
+      html += '<div><strong>(' + escapeMarkup(matrixState.player1.strategies[ne.row]) + ', ' + escapeMarkup(matrixState.player2.strategies[ne.col]) +
+        ')</strong>: (' + escapeMarkup(cell.u1) + ', ' + escapeMarkup(cell.u2) + ')</div>';
+    });
+    if (matrixState.eliminatedRows.length || matrixState.eliminatedCols.length) html += '<div>Analysis applies only to the remaining active strategies.</div>';
+    html += '<div>Manual underlines and NE markers are annotations, not verification.</div></div>';
 
     container.innerHTML = html;
   }
@@ -1347,6 +1354,9 @@
       }
       renderAll();
     },
+    reconcileState: computeBestResponses,
+    analyzePayoffs: analyzePayoffs,
+    generateSVG: generateSVG,
     generateTikZCode: generateTikZCode,
     generateTabularCode: generateTabularCode,
     renderAll: renderAll,

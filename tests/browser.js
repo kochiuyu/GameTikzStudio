@@ -7,6 +7,7 @@ export function loadBrowser(...files) {
   const storage = new Map();
   const context = vm.createContext({
     console,
+    TextEncoder,
     document: { readyState: 'loading', getElementById: () => null, addEventListener() {} },
     localStorage: {
       getItem: key => storage.get(key) ?? null,
