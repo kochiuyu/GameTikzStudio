@@ -152,7 +152,7 @@ test('canvas draws split phase labels over the same separate runs as TikZ', () =
   const canvas = { getContext: () => draw, getBoundingClientRect: () => ({ width: 820, height: 480 }) };
   context.document.getElementById = id => id === 'timing-canvas' ? canvas : null;
   context.GameTimingApp.moveStage(1, 1);
-  for (const x of [280, 690]) {
+  for (const x of [100 + 590 / 3, 690]) {
     const group = labels.filter(label => label.x === x);
     assert.equal(group.map(label => label.text).join(' '), 'Market Equilibrium & Payoffs');
     assert.ok(group.length > 1);
@@ -180,7 +180,7 @@ test('long phase names expand canvas vertically and break long words within a ru
   app.renderAll();
   assert.ok(canvas.height > 480);
   assert.ok(labels.every(label => label.y >= 20));
-  assert.ok(labels.filter(label => label.x === 75).every(label => label.text.length * 6 <= 158));
+  assert.ok(labels.filter(label => label.x === 100).every(label => label.text.length * 6 <= 158));
   const height = canvas.height;
   app.renderAll();
   assert.equal(canvas.height, height);

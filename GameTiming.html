@@ -59,6 +59,23 @@
       border-color: #38bdf8 !important;
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
     }
+    .timing-preview-column { min-width: 0; width: 100%; }
+    .timing-preview-toolbar,
+    .timing-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; }
+    .timing-preview-toolbar { justify-content: space-between; margin-bottom: 0.75rem; }
+    .timing-preview-controls .btn-modern { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+    #timing-preview-zoom { min-width: 3.5em; text-align: center; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+    #timing-preview-viewport {
+      width: 100%; min-width: 0; height: clamp(240px, 55vh, 520px);
+      overflow: auto; background: #ffffff; border: 1px solid var(--color-border);
+      border-radius: 8px; overscroll-behavior: contain;
+    }
+    #timing-preview-viewport:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+    .timing-preview-stage {
+      display: flex; width: max-content; min-width: 100%; min-height: 100%;
+      padding: 16px; box-sizing: border-box;
+    }
+    #timing-canvas { display: block; flex: none; max-width: none; margin: auto; }
     .code-area-modern::selection,
     textarea#timing-tikz-code::selection,
     textarea#timing-standalone-code::selection {
@@ -259,7 +276,7 @@
       </aside>
 
       <!-- CENTER: Canvas Visualization -->
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div class="timing-preview-column" style="display: flex; flex-direction: column; gap: 1rem;">
         <div class="control-card" id="workspace-canvas-card" style="padding: 1rem;">
           <!-- Beginner Tip Banner -->
           <div class="beginner-tip-banner tip-indigo" id="timing-beginner-tip" style="margin-bottom: 0.75rem;">
@@ -270,16 +287,24 @@
             <button type="button" onclick="document.getElementById('timing-beginner-tip').style.display='none';" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 1rem; line-height: 1;" title="Dismiss Tip">&times;</button>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <div class="timing-preview-toolbar">
             <h2 style="font-size: 1rem; font-weight: 700; color: var(--color-text-main); margin: 0;">Dynamic Sequence Diagram Preview</h2>
-            <div style="display: flex; gap: 0.35rem;">
-              <button type="button" class="btn-modern btn-modern-secondary" onclick="exportTimingImage();" style="font-size: 0.75rem; padding: 0.25rem 0.55rem;">Export PNG</button>
+            <div class="timing-preview-controls" role="group" aria-label="Preview controls">
+              <button type="button" id="timing-preview-zoom-out" class="btn-modern btn-modern-secondary" onclick="GameTimingApp.zoomPreview(-1);" aria-label="Zoom out" title="Zoom out">−</button>
+              <output id="timing-preview-zoom" aria-live="polite" aria-label="Preview zoom">100%</output>
+              <button type="button" id="timing-preview-zoom-in" class="btn-modern btn-modern-secondary" onclick="GameTimingApp.zoomPreview(1);" aria-label="Zoom in" title="Zoom in">+</button>
+              <button type="button" id="timing-preview-fit" class="btn-modern btn-modern-secondary" onclick="GameTimingApp.fitPreview();" aria-pressed="true" title="Fit the whole diagram in the preview">Fit</button>
+              <button type="button" class="btn-modern btn-modern-secondary" onclick="GameTimingApp.resetPreviewZoom();" title="Show the diagram at its original size">100%</button>
+              <button type="button" class="btn-modern btn-modern-secondary" onclick="exportTimingImage();">Export PNG</button>
             </div>
           </div>
 
-          <div style="background: #ffffff; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 0.5rem;">
-            <canvas id="timing-canvas" width="820" height="480" style="max-width: 100%; height: auto;"></canvas>
+          <div id="timing-preview-viewport" tabindex="0" role="region" aria-label="Game timing diagram preview" aria-describedby="timing-preview-help">
+            <div class="timing-preview-stage">
+              <canvas id="timing-canvas" width="820" height="480" aria-label="Sequence of game stages"></canvas>
+            </div>
           </div>
+          <p id="timing-preview-help" style="font-size: 0.72rem; color: var(--color-text-muted); margin: 0.5rem 0 0;">Zoom in for detail, then scroll in any direction. Fit shows the whole diagram. Zoom does not affect exports.</p>
         </div>
 
         <div class="control-card" style="padding: 1rem; background: #f8fafc;">
