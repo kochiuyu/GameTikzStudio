@@ -1,5 +1,15 @@
 # Maintenance validation
 
+## Timing preview navigation (2026-11-04)
+
+Validated `fix/timing-preview-zoom` from main `71bdfba`.
+
+- `npm run check`: 101 regression tests and source/inline syntax checks pass. New coverage exercises Fit in both dimensions, zoom limits, centered zoom, original-size reset, viewport resizing, tall diagrams, first-stage label padding, unchanged model/TikZ and full-resolution canvas drawing during zoom.
+- `npm run build`: static packaging passes.
+- Supported static-preview Chromium checks passed for repeated zoom to the 300% limit, 100% reset, horizontal/vertical keyboard scrolling, Fit returning to the origin without scrollbars, add/undo while zoomed, reload, and sidebar collapse/expand. At the tested 1165px page width, the zoomed canvas created internal scrollbars without horizontal page overflow.
+- Zoom changes CSS dimensions only; the browser's backing canvas stayed 820 × 480 while its displayed size reached 1281.25 × 750. The existing PNG exporter and TikZ generator are unchanged. Browser download-event capture timed out, so a downloaded PNG byte comparison was not completed.
+- This is representative desktop Chromium verification, not exhaustive mobile or cross-browser coverage. Narrow and tall viewport sizing is additionally covered by automated tests.
+
 ## Reliability update (2026-11-04)
 
 Validated the local `fix/studio-reliability` changes from main `25d6d5e` using Node 24.22.1.

@@ -1072,6 +1072,63 @@
     return lines;
   }
 
+  // Preview scale is deliberately separate from model state and canvas pixels.
+  // Exports always read the full backing canvas, never the zoomed viewport.
+  var preview = { fit: true, zoom: 1, width: 820, height: 480 };
+  var MIN_PREVIEW_ZOOM = 0.1;
+  var MAX_PREVIEW_ZOOM = 3;
+
+  function updatePreview(resetScroll) {
+    var canvas = document.getElementById('timing-canvas');
+    var viewport = document.getElementById('timing-preview-viewport');
+    if (!canvas || !viewport) return;
+    var oldWidth = parseFloat(canvas.style.width) || preview.width;
+    var oldHeight = parseFloat(canvas.style.height) || preview.height;
+    var viewWidth = viewport.clientWidth || viewport.offsetWidth - 2;
+    var viewHeight = viewport.clientHeight || viewport.offsetHeight - 2;
+    var centerX = (viewport.scrollLeft + viewWidth / 2 - Math.max(16, (viewWidth - oldWidth) / 2)) / oldWidth;
+    var centerY = (viewport.scrollTop + viewHeight / 2 - Math.max(16, (viewHeight - oldHeight) / 2)) / oldHeight;
+    if (preview.fit) {
+      // Use the border box so scrollbars cannot cause a resize feedback loop.
+      preview.zoom = Math.min(1,
+        Math.max(1, viewport.offsetWidth - 34) / preview.width,
+        Math.max(1, viewport.offsetHeight - 34) / preview.height);
+    }
+    canvas.style.width = (preview.width * preview.zoom) + 'px';
+    canvas.style.height = (preview.height * preview.zoom) + 'px';
+    var label = document.getElementById('timing-preview-zoom');
+    if (label) label.textContent = Math.round(preview.zoom * 100) + '%';
+    var zoomOut = document.getElementById('timing-preview-zoom-out');
+    var zoomIn = document.getElementById('timing-preview-zoom-in');
+    var fit = document.getElementById('timing-preview-fit');
+    if (zoomOut) zoomOut.disabled = preview.zoom <= MIN_PREVIEW_ZOOM;
+    if (zoomIn) zoomIn.disabled = preview.zoom >= MAX_PREVIEW_ZOOM;
+    if (fit) fit.setAttribute('aria-pressed', String(preview.fit));
+    if (resetScroll || preview.fit) {
+      viewport.scrollLeft = 0;
+      viewport.scrollTop = 0;
+    } else {
+      // Keep the inspected part near the center as zoom changes. Let the browser
+      // clamp scrolling at the edges, which also keeps the origin reachable.
+      viewWidth = viewport.clientWidth || viewport.offsetWidth - 2;
+      viewHeight = viewport.clientHeight || viewport.offsetHeight - 2;
+      var newWidth = preview.width * preview.zoom;
+      var newHeight = preview.height * preview.zoom;
+      viewport.scrollLeft = Math.max(0, centerX * newWidth + Math.max(16, (viewWidth - newWidth) / 2) - viewWidth / 2);
+      viewport.scrollTop = Math.max(0, centerY * newHeight + Math.max(16, (viewHeight - newHeight) / 2) - viewHeight / 2);
+    }
+  }
+
+  function zoomPreview(direction) {
+    if (direction !== -1 && direction !== 1) return;
+    // Fit may be smaller than the manual minimum for unusually tall diagrams.
+    if (direction < 0 && preview.zoom <= MIN_PREVIEW_ZOOM) return;
+    preview.fit = false;
+    preview.zoom = Math.max(MIN_PREVIEW_ZOOM, Math.min(MAX_PREVIEW_ZOOM,
+      preview.zoom * (direction > 0 ? 1.25 : 0.8)));
+    updatePreview(false);
+  }
+
   // HTML5 Canvas Rendering
   function renderCanvas() {
     var canvas = document.getElementById("timing-canvas");
@@ -1085,8 +1142,9 @@
     var n = stages.length;
 
     var dpr = window.devicePixelRatio || 1;
-    var rect = canvas.getBoundingClientRect();
-    var width = Math.max(rect.width || 820, 820);
+    var viewport = document.getElementById('timing-preview-viewport');
+    // Never derive drawing dimensions from the CSS-zoomed canvas itself.
+    var width = Math.max(viewport ? viewport.offsetWidth - 34 : 820, 820);
     // Start from a stable base; the previous intrinsic canvas height may include
     // expanded phase labels and must not cause growth on repeated renders.
     var height = 480;
@@ -1094,7 +1152,8 @@
     if (n === 0) return;
 
     // Responsive Geometry & Column Widths
-    var marginL = n >= 5 ? 60 : 75;
+    // Keep the first centered text column inside the canvas, even at full size.
+    var marginL = 100;
     var marginR = n >= 5 ? 110 : 130;
     var availW = width - marginL - marginR;
     var stepX = n > 1 ? (availW / (n - 1)) : (availW / 2);
@@ -1310,6 +1369,9 @@
         ctx.fillText(cleanPayoff, x, payoffY + 3.5);
       }
     });
+    preview.width = width;
+    preview.height = height;
+    updatePreview(false);
   }
 
   function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -1400,6 +1462,9 @@
   }
 
   var GameTimingApp = {
+    zoomPreview: zoomPreview,
+    fitPreview: function() { preview.fit = true; updatePreview(true); },
+    resetPreviewZoom: function() { preview.fit = false; preview.zoom = 1; updatePreview(true); },
     generateTikZCode: generateTikZCode,
     getState: function() { return timingState; },
     normalizePhases: normalizePhases,
@@ -1462,6 +1527,17 @@
 
   window.addEventListener('DOMContentLoaded', function() {
     renderAll();
+    var viewport = document.getElementById('timing-preview-viewport');
+    if (viewport && window.ResizeObserver) {
+      var lastWidth = viewport.offsetWidth;
+      var lastHeight = viewport.offsetHeight;
+      new window.ResizeObserver(function() {
+        if (viewport.offsetWidth === lastWidth && viewport.offsetHeight === lastHeight) return;
+        lastWidth = viewport.offsetWidth;
+        lastHeight = viewport.offsetHeight;
+        renderCanvas();
+      }).observe(viewport);
+    }
   });
 
   var resizeTimeout;

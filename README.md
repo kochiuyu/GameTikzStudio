@@ -14,6 +14,8 @@ Start with `index.html`; `Help.html` contains the in-app guide. Presets provide 
 
 The matrix and timing studios autosave model edits in this browser, including text still being typed before it loses focus. Each studio has its own saved project. Refresh restores that project; changing a preset is undoable.
 
+The timing preview starts fitted to its panel. Use **− / +** to zoom, **100%** for original size, and **Fit** to show the whole diagram again. Scroll horizontally or vertically to inspect a zoomed diagram; the preview can also be focused for keyboard scrolling. Zoom affects only the preview, not PNG/TikZ exports or saved projects.
+
 - **Save Project** downloads a versioned JSON backup. **Load Project** validates a file before replacing the current model; loading can be undone. Open files in the matching studio.
 - **Undo / Redo** keeps up to 100 recent edits in the current session. Typing is grouped, and a new edit clears redo. Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y) work outside text fields; text fields keep native editing shortcuts. History itself does not survive refresh.
 - Autosave is local, not cloud sync. Clearing browser data, private browsing or storage restrictions can remove/prevent it. A status beside the project buttons warns when autosave is unavailable. Keep downloaded backups for important work.
